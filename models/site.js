@@ -25,6 +25,7 @@ const siteSchema = mongoose.Schema(
         }],
         siteAdmins: [{
             type: mongoose.Schema.Types.ObjectId,
+            ref: 'employees',
             required: true
         }]
     }

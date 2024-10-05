@@ -4,10 +4,12 @@ const dailyRecordSchema = mongoose.Schema(
     {
         employeeId: {
             type: mongoose.Schema.Types.ObjectId,
+            ref: 'employees',
             required: true
         },
         siteId: {
             type: mongoose.Schema.Types.ObjectId,
+            ref: 'sites',
             required: true
         },
         checkin: {
