@@ -1,0 +1,6 @@
+//get('/employee/:employeeId')
+//post('/login')
+//get('/task/:employeeId')
+//put('/checkin/:dailyRecordId')
+//put('/checkout/:dailyRecordId')
+//put('/employee/remark/:dailyRecordId')
