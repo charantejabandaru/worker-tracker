@@ -8,7 +8,7 @@
 //get('/employee/role/:role')
 //get('/employee/specification/:specification')
 //get('/request')
-//delete('/request')
+//delete('/request/:requestId')
 //get('/employee-status/:status')
 //post('/assignsite/:siteId')
 //delete('/employee/:employeeId')
