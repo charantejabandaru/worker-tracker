@@ -30,6 +30,14 @@ const employeeSchema = mongoose.Schema(
             type: String,
             required: true
         },
+        status: {
+            type: String,
+            enum: ['available','assigned','unavailable'],
+            default: 'available'
+        },
+        workAssigned: [{
+            type: String
+        }],
         profilePhoto: {
             imageUrl: {
                 type: String,
