@@ -1,4 +1,4 @@
-//post('/employee')
+//post('/register')
 //get('/employee')
 //put('/employee/:employeeId')
 //post('/site')
@@ -10,9 +10,21 @@
 //get('/request')
 //delete('/request/:requestId')
 //get('/employee-status/:status')
-//post('/assignsite/:siteId')
+//post('/assignsite/:siteId/:employeeId')
 //delete('/employee/:employeeId')
 //put('/site/:siteId')
 //delete('/site/:siteId')
 //delete('/dailyrecord/:dailyRecordId')
 //post('/register')
+
+const { Router } = require('express');
+const superAdminServices = require('../services/superadmin');
+const router = Router({ strict: true });
+
+router.post('/register', superAdminServices.register);
+//router.get('/employees', superAdminServices.getEmployees);
+//router.put('/employee/:employeeId', superAdminServices.updateEmployee);
+router.post('/site', superAdminServices.addSite);
+router.post('/assignsite/:siteId/:employeeId', superAdminServices.addDailyRecord);
+
+module.exports = router;
