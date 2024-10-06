@@ -10,9 +10,20 @@
 //get('/request')
 //delete('/request/:requestId')
 //get('/employee-status/:status')
-//post('/assignsite/:siteId')
+//post('/assignsite/:siteId/:employeeId')
 //delete('/employee/:employeeId')
 //put('/site/:siteId')
 //delete('/site/:siteId')
 //delete('/dailyrecord/:dailyRecordId')
 //post('/register')
+
+const { Router } = require("express");
+const superAdminServices = require('../services/superadmin');
+const router = Router({ strict: true });
+
+router.post('/employee', superAdminServices.register);
+router.get('/employees', superAdminServices.getEmployees);
+router.put('/employee/:employeeId', superAdminServices.updateEmployee);
+
+
+module.exports = router;
