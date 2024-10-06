@@ -15,3 +15,4 @@
 //put('/site/:siteId')
 //delete('/site/:siteId')
 //delete('/dailyrecord/:dailyRecordId')
+//post('/register')
