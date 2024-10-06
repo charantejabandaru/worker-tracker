@@ -14,6 +14,8 @@ app.use(bodyparser.json());
 dotenv.config({path : './config/.env'})
 configdb();
 
+app.use(require('./controllers/superadmin'));
+
 app.listen(4200,() => {
     console.log("server is running on port 4200");
 });
