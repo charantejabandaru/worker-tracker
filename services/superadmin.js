@@ -32,6 +32,58 @@ exports.getEmployees = async (req, res) => {
     }
 }
 
+exports.getEmployeeByRole = async (req, res) => {
+    try {
+        const result = await employeeModel.find({role: req.params.role});
+        if (!result) {
+            return res.status(404).json({ message: `Employee with role ${req.params.role} not found` });
+        }
+        res.status(200).json(result);
+    }
+    catch(error) {
+        res.status(500).json({ message: "Server error occurred. Please try again later." });
+    }
+}
+
+exports.getEmployeeBySpecification = async (req, res) => {
+    try {
+        const result = await employeeModel.find({specification: req.params.specification});
+        if (!result) {
+            return res.status(404).json({ message: `Employee with specification ${req.params.specification} not found` });
+        }
+        res.status(200).json(result);
+    }
+    catch(error) {
+        res.status(500).json({ message: "Server error occurred. Please try again later." });
+    }
+}
+
+exports.getEmployeeStatus = async (req, res) => {
+    try {
+        const result = await employeeModel.find({ status: req.params.status});
+        if(!result){
+            return res.status(404).json({ message: `No one with status ${req.params.status}` });
+        }
+    }
+    catch(error) {
+        res.status(500).json({ message: "Server error occurred. Please try again later." });
+    }
+}
+
+exports.updateEmployee = async (req, res) => {
+    try {
+        const newEmployee = req.body;
+        const result = await employeeModel.findByIdAndUpdate(req.params.employeeId,newEmployee,{new: true, runValidators: true});
+        if(!result){
+            return res.status(404).json({ message: `Employee not found with Id ${req.params.employeeId}` });
+        }
+        return res.status(200).json(result);
+    }
+    catch(error) {
+        res.status(500).json({ message: "Server error occurred. Please try again later." });
+    }
+}
+
 exports.removeEmployee = async (req, res) => {
     try {
         const result = await employeeModel.deleteOne({_id: req.params.employeeId});
@@ -96,6 +148,16 @@ exports.getSiteByLocation = async (req, res) => {
             return res.status(404).json({ message: "No sites in "+req.params.location });
         }
         res.status(200).json(result);
+    }
+    catch(error) {
+        res.status(500).json({ message: "Server error occurred. Please try again later." });
+    }
+}
+
+exports.updateSite = (req, res) => {
+    try{
+        const newSite = req.body;
+        
     }
     catch(error) {
         res.status(500).json({ message: "Server error occurred. Please try again later." });
