@@ -6,7 +6,7 @@
 //put('/siteadmin/remark/:dailyRecordId')
 //put('/workstatus/:dailyRecordId')
 //put('/assignwork/:dailyRecordId')
-//put('/progress/:dailyRecordId')
+//put('/progress/:siteId')
 
 const express = require('express');
 const siteAdminRouter = express.Router();
@@ -19,6 +19,7 @@ siteAdminRouter.post('/request', siteAdminService.createRequest);
 siteAdminRouter.put('/siteadmin/remark/:dailyRecordId', siteAdminService.updateRemark);
 siteAdminRouter.put('/workstatus/:dailyRecordId', siteAdminService.updateWorkStatus);
 siteAdminRouter.put('/assignwork/:dailyRecordId', siteAdminService.updateWorkAssigned);
+siteAdminRouter.put('/progress/:siteId', siteAdminService.updateProgress);
 
 module.exports = siteAdminRouter;
 

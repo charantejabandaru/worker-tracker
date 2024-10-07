@@ -17,19 +17,18 @@ const siteSchema = mongoose.Schema(
             imageUrl: {
                 type: String,
                 unique: true
-              },
-              timestamp: {
+            },
+            timestamp: {
                 type: Date
-              }
+            }
         }],
         siteAdmins: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'employees',
-            required: true
+            ref: 'employees'
         }]
     }
 );
 
-const siteModel = mongoose.model('sites',siteSchema);
+const siteModel = mongoose.model('sites', siteSchema);
 
 module.exports = siteModel;

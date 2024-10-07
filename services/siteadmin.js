@@ -110,3 +110,35 @@ module.exports.updateWorkAssigned = (req, res) => {
     }
     updateDailyRecord("workAssigned", workAssigned, dailyRecordId, res);
 };
+
+module.exports.updateProgress = async (req, res) => {
+    const { siteId } = req.params;
+    const { progressImages } = req.body;
+    if (!mongoose.Types.ObjectId.isValid(siteId)) {
+        return res.status(400).json({ message: 'Invalid ID format' });
+    }
+    if (progressImages) {
+        try {
+            const result = await siteModel.findByIdAndUpdate(
+                siteId,
+                {
+                     "$push": { progressImages: progressImages } 
+                },
+                { new: true, runValidators: true }
+            );
+            if (result) {
+                return res.status(200).json({
+                    message: "Progress updated successfully",
+                    details: result
+                });
+            } else {
+                return res.status(404).json({ message: "Site Id not found" });
+            }
+        } catch(error) {
+            errorHandler(error, res);
+        }
+    } else {
+        return res.status(400).json({ message: "Body data not found" });
+    }
+
+};
