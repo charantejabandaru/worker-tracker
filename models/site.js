@@ -19,8 +19,7 @@ const siteSchema = mongoose.Schema(
                 unique: true
               },
               timestamp: {
-                type: Date,
-                default: Date.now,
+                type: Date
               }
         }],
         siteAdmins: [{
