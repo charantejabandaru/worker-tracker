@@ -18,22 +18,18 @@ const dailyRecordSchema = mongoose.Schema(
                 unique: true
             },
             location: {
-                type: String,
-                required: true
+                type: String
             },
             timestamp: {
-                type: Date,
-                default: Date.now
+                type: Date
             }
         },
         checkout: {
             location: {
-                type: String,
-                required: true
+                type: String
             },
             timestamp: {
-                type: Date,
-                default: Date.now
+                type: Date
             }
         },
         workAssigned: {
