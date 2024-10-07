@@ -1,5 +1,3 @@
-//put('/site/:siteId')
-
 const { Router } = require('express');
 const superAdminServices = require('../services/superadmin');
 const router = Router({ strict: true });

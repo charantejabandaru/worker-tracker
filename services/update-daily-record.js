@@ -19,10 +19,10 @@ module.exports = async (fieldName, value, dailyRecordId, res) => {
         }
     } catch (error) {
         if (error.name === 'ValidationError') {
-            return res.status(400).json({ error: 'Bad Request: Validation failed', details: error.message });
+            return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
         }
         else if (error.code === 11000) {
-            return res.status(409).json({ error: 'Conflict: Duplicate key error', details: error.message });
+            return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
         } else {
             console.error(error);
             return res.status(500).json({ message: "Server side error" });

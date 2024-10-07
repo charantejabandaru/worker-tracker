@@ -57,13 +57,13 @@ module.exports.getDailyRecordsBySiteId = async (req, res) => {
 
 const errorHandler = (error, res) => {
     if (error.name === 'ValidationError') {
-        res.status(400).json({ error: 'Bad Request: Validation failed', details: error.message });
+        res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
     }
     else if (error.code === 11000) {
-        res.status(409).json({ error: 'Conflict: Duplicate key error', details: error.message });
+        res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
     }
     else {
-        res.status(500).json({ error: 'Internal Server Error', details: error.message });
+        res.status(500).json({ message: 'Internal Server Error', details: error.message });
     }
 }
 
@@ -114,6 +114,10 @@ module.exports.updateWorkAssigned = (req, res) => {
 module.exports.updateProgress = async (req, res) => {
     const { siteId } = req.params;
     const { progressImages } = req.body;
+    await this.updateProgressImages(siteId, progressImages);
+};
+
+exports.updateProgressImages = async (siteId, progressImages) => {
     if (!mongoose.Types.ObjectId.isValid(siteId)) {
         return res.status(400).json({ message: 'Invalid ID format' });
     }
@@ -140,5 +144,4 @@ module.exports.updateProgress = async (req, res) => {
     } else {
         return res.status(400).json({ message: "Body data not found" });
     }
-
-};
+}
