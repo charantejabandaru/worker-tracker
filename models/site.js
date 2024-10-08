@@ -13,15 +13,6 @@ const siteSchema = mongoose.Schema(
         info: {
             type: String
         },
-        progressImages: [{
-            imageUrl: {
-                type: String,
-                unique: true
-            },
-            timestamp: {
-                type: Date
-            }
-        }],
         siteAdmins: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'employees'

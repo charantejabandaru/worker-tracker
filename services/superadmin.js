@@ -71,20 +71,6 @@ exports.getEmployeeStatus = async (req, res) => {
     }
 }
 
-exports.updateEmployee = async (req, res) => {
-    try {
-        const newEmployee = req.body;
-        const result = await employeeModel.findByIdAndUpdate(req.params.employeeId, newEmployee, { new: true, runValidators: true });
-        if (!result) {
-            return res.status(404).json({ message: `Employee not found with Id ${req.params.employeeId}` });
-        }
-        return res.status(200).json(result);
-    }
-    catch (error) {
-        res.status(500).json({ message: "Server error occurred. Please try again later." });
-    }
-}
-
 exports.removeEmployee = async (req, res) => {
     try {
         const result = await employeeModel.deleteOne({ _id: req.params.employeeId });

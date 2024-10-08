@@ -26,7 +26,7 @@ const employeeSchema = mongoose.Schema(
             enum: ['superAdmin', 'siteAdmin', 'technician'],
             required: true
         },
-        specification: {
+        skill: {
             type: String,
             required: true
         },

@@ -7,7 +7,6 @@ router.get('/employee', superAdminServices.getEmployees);
 router.get('/employee/role/:role', superAdminServices.getEmployeeByRole);
 router.get('/employee/specification/:specification', superAdminServices.getEmployeeBySpecification);
 router.get('/employee-status/:status', superAdminServices.getEmployeeStatus);
-router.put('/employee/:employeeId', superAdminServices.updateEmployee);
 router.delete('/employee/:employeeId', superAdminServices.removeEmployee);
 router.post('/site', superAdminServices.addSite);
 router.get('/site', superAdminServices.getSites);
