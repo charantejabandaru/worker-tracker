@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const employeeModel = require('../models/employee');
 const siteModel = require('../models/site');
 const dailyRecordModel = require('../models/dailyrecord');
@@ -5,8 +6,13 @@ const resourceModel = require('../models/resource');
 const siteAdminServices = require('./siteadmin');
 
 exports.register = async (req, res) => {
+    const employee = req.body;
+    const { password } = employee;
+    if (!password) {
+        return res.status(400).json({ message: "Password field is empty" });
+    }
+    employee.password = bcrypt.hashSync(password, 10);
     try {
-        const employee = req.body;
         await employeeModel.create(employee);
         res.status(201).json({ message: 'Employee registered successfully' });
     }
@@ -187,7 +193,6 @@ exports.updateSite = async (req, res) => {
             }
             return res.status(200).json(result);
         }
-
     }
     catch (error) {
         res.status(500).json({ message: "Server error occurred. Please try again later." });
