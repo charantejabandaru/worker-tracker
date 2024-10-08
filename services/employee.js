@@ -6,11 +6,11 @@ const dailyRecordModel = require('../models/dailyrecord');
 const updateDailyRecord = require('./update-daily-record');
 
 module.exports.checkLogin = async (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
-        return res.status(400).json({ message: "Unsufficient data" });
-    }
     try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ message: "Unsufficient data" });
+        }
         const employee = await employeeModel.findOne({ email });
         if (!employee) {
             return res.status(401).json({ message: "Employee not found" });
@@ -18,7 +18,7 @@ module.exports.checkLogin = async (req, res) => {
         const result = await bcrypt.compare(password, employee.password);
         if (result) {
             const payload = { id: employee._id, role: employee.role };
-            const token = jwt.sign(payload, process.env.SCRETKEY);
+            const token = jwt.sign(payload, process.env.SECRETKEY);
             return res.status(200).json({ 'auth_token': token });
         } else {
             return res.status(401).json({ message: "Invalid password" });
@@ -29,11 +29,11 @@ module.exports.checkLogin = async (req, res) => {
 };
 
 module.exports.getEmployeeById = async (req, res) => {
-    const { employeeId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(employeeId)) {
-        return res.status(400).json({ message: 'Invalid ID format' });
-    }
     try {
+        const { employeeId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(employeeId)) {
+            return res.status(400).json({ message: 'Invalid ID format' });
+        }
         const employee = await employeeModel.findById(employeeId);
         if (employee) {
             return res.status(200).json(employee);
@@ -45,26 +45,57 @@ module.exports.getEmployeeById = async (req, res) => {
     }
 };
 
-exports.updateEmployee = async (req, res) => {
+exports.updateEmployeeById = async (req, res) => {
     try {
-        const newEmployee = req.body;
-        const result = await employeeModel.findByIdAndUpdate(req.params.employeeId, newEmployee, { new: true, runValidators: true });
-        if (!result) {
-            return res.status(404).json({ message: `Employee not found with Id ${req.params.employeeId}` });
+        const { employeeId } = req.params;
+        const newEmployeeDetails = req.body;
+        if (!mongoose.Types.ObjectId.isValid(employeeId)) {
+            return res.status(400).json({ message: 'Invalid ID format' });
         }
-        return res.status(200).json(result);
+        if (!newEmployeeDetails) {
+            return res.status(400).json({ message: "Required data is missing" })
+        }
+        if (newEmployeeDetails.password) {
+            newEmployeeDetails.password = bcrypt.hashSync(newEmployeeDetails.password, 10);
+        }
+        const employee = await employeeModel.findByIdAndUpdate(employeeId, newEmployeeDetails, { new: true, runValidators: true });
+        if (!employee) {
+            return res.status(404).json({ message: "Employee Id not found" });
+        }
+        return res.status(200).json({ message: "Employee details updated successfully" });
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
+        }
+        else if (error.code === 11000) {
+            return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
+        } else {
+            console.error(error);
+            return res.status(500).json({ message: "Server side error" });
+        }
     }
-    catch (error) {
-        res.status(500).json({ message: "Server error occurred. Please try again later." });
-    }
-}
+};
 
-module.exports.getTasksById = async (req, res) => {
-    const { employeeId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(employeeId)) {
-        return res.status(400).json({ message: 'Invalid ID format' });
-    }
+// exports.updateEmployee = async (req, res) => {
+//     try {
+//         const newEmployee = req.body;
+//         const result = await employeeModel.findByIdAndUpdate(req.params.employeeId, newEmployee, { new: true, runValidators: true });
+//         if (!result) {
+//             return res.status(404).json({ message: `Employee not found with Id ${req.params.employeeId}` });
+//         }
+//         return res.status(200).json(result);
+//     }
+//     catch (error) {
+//         res.status(500).json({ message: "Server error occurred. Please try again later." });
+//     }
+// }
+
+exports.getTasksById = async (req, res) => {
     try {
+        const { employeeId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(employeeId)) {
+            return res.status(400).json({ message: 'Invalid ID format' });
+        }
         const tasks = await dailyRecordModel.find({
             employeeId: employeeId
         }).populate('siteId');
@@ -75,7 +106,7 @@ module.exports.getTasksById = async (req, res) => {
 };
 
 
-module.exports.updateCheckin = (req, res) => {
+exports.updateCheckin = (req, res) => {
     const { dailyRecordId } = req.params;
     const { checkin } = req.body;
     if (!mongoose.Types.ObjectId.isValid(dailyRecordId)) {
@@ -84,7 +115,7 @@ module.exports.updateCheckin = (req, res) => {
     updateDailyRecord("checkin", checkin, dailyRecordId, res);
 };
 
-module.exports.updateCheckout = (req, res) => {
+exports.updateCheckout = (req, res) => {
     const { dailyRecordId } = req.params;
     const { checkout } = req.body;
     if (!mongoose.Types.ObjectId.isValid(dailyRecordId)) {
@@ -93,7 +124,7 @@ module.exports.updateCheckout = (req, res) => {
     updateDailyRecord("checkout", checkout, dailyRecordId, res);
 };
 
-module.exports.updateEmployeeRemark = (req, res) => {
+exports.updateEmployeeRemark = (req, res) => {
     const { dailyRecordId } = req.params;
     const { technicianRemark } = req.body;
     if (!mongoose.Types.ObjectId.isValid(dailyRecordId)) {

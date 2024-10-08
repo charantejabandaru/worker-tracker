@@ -11,16 +11,18 @@
 const express = require('express');
 const siteAdminRouter = express.Router();
 const siteAdminService = require('../services/siteadmin');
+const adminServices = require('../services/admin');
 
-// siteAdminRouter.get('/site/employee/:employeeId', siteAdminService.getSitesBySiteAdminId);
-// siteAdminRouter.get('/site/id/:siteId', siteAdminService.getSiteBySiteId);
+
+siteAdminRouter.get('/sites/admin/:employeeId', adminServices.getSitesBySiteAdminId);
+siteAdminRouter.get('/site/id/:siteId', adminServices.getSiteBySiteId);
 // siteAdminRouter.get('/site/dailyRecord/:siteId', siteAdminService.getDailyRecordsBySiteId);
 // siteAdminRouter.post('/request', siteAdminService.createRequest);
-// siteAdminRouter.put('/siteadmin/remark/:dailyRecordId', siteAdminService.updateRemark);
-// siteAdminRouter.put('/workstatus/:dailyRecordId', siteAdminService.updateWorkStatus);
+siteAdminRouter.put('/siteadmin/remark/:dailyRecordId', adminServices.updateRemark);
+siteAdminRouter.put('/workstatus/:dailyRecordId', adminServices.updateWorkStatus);
 // siteAdminRouter.put('/assignwork/:dailyRecordId', siteAdminService.updateWorkAssigned);
 // siteAdminRouter.put('/progress/:siteId', siteAdminService.updateProgress);
-
+siteAdminRouter.get('/dailyrecord/lastassigned/:employeeId', adminServices.getLastAssignedWoryByEmployeeId);
 module.exports = siteAdminRouter;
 
 //get('/dailyrecord/site/:siteId');
@@ -28,19 +30,19 @@ module.exports = siteAdminRouter;
 
 //This are common for super admin and site admin
 //
-//get('/employee')
-//get('/employee/role/:role')
-//get('/employee/status/:status')
-//get('/dailyrecord/lastassigned/:employeeId')
-//post('/dailyrecord')
+//get('/employee') 1
+//get('/employee/role/:role') 1
+//get('/employee/status/:status') 1
+//get('/dailyrecord/lastassigned/:employeeId') 1
+//post('/dailyrecord') 1
 //put('/dailyrecord/work/:dailyRecordId')
-//get('/site/id/:siteId')
-//put('/siteadmin/remark/:dailyRecordId')
-//get('/progressimage/:siteId')
-//put('/progressimage/:progressId')
-//delete('/progressimage/:progressId')
-//post('/progressimage')
-//get('/sites/admin/:employeeId')
+//get('/site/id/:siteId') 1
+//put('/siteadmin/remark/:dailyRecordId') 1
+//get('/progressimage/:siteId')--
+//put('/progressimage/:progressId')--
+//delete('/progressimage/:progressId')--
+//post('/progressimage')--
+//get('/sites/admin/:employeeId') 1
 
 //Common for all users
 //

@@ -24,7 +24,6 @@ module.exports = async (fieldName, value, dailyRecordId, res) => {
         else if (error.code === 11000) {
             return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
         } else {
-            console.error(error);
             return res.status(500).json({ message: "Server side error" });
         }
     }
