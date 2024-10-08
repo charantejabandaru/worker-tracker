@@ -12,7 +12,7 @@ const dailyRecordSchema = mongoose.Schema(
             ref: 'sites',
             required: true
         },
-        checkin: {
+        checkin: [{
             imageUrl: {
                 type: String,
                 unique: true
@@ -23,15 +23,15 @@ const dailyRecordSchema = mongoose.Schema(
             timestamp: {
                 type: Date
             }
-        },
-        checkout: {
+        }],
+        checkout: [{
             location: {
                 type: String
             },
             timestamp: {
                 type: Date
             }
-        },
+        }],
         workAssigned: {
             type: String,
             required: true
