@@ -2,7 +2,6 @@ const bcrypt = require('bcrypt');
 const employeeModel = require('../models/employee');
 const siteModel = require('../models/site');
 const dailyRecordModel = require('../models/dailyrecord');
-// const resourceModel = require('../models/resource');
 const siteAdminServices = require('./siteadmin');
 
 exports.register = async (req, res) => {
@@ -186,31 +185,3 @@ exports.removeDailyRecord = async (req, res) => {
         }
     }
 }
-
-// exports.getRequests = async () => {
-//     try {
-//         const result = await resourceModel.find({});
-//         res.status(200).json(result);
-//     }
-//     catch (error) {
-//         res.status(500).json({ message: "Server error. Could not fetch resources." });
-//     }
-// }
-
-// exports.deleteRequest = async (req, res) => {
-//     try {
-//         const result = await resourceModel.deleteOne({ _id: req.params.requestId });
-//         if (result.deletedCount === 0) {
-//             return res.status(404).json({ message: 'Request not found' });
-//         }
-//         res.status(200).json({ message: 'Request deleted successfully' });
-//     }
-//     catch (error) {
-//         if (error.kind === 'ObjectId') {
-//             res.status(400).json({ message: 'Bad Request: Invalid request ID' });
-//         }
-//         else {
-//             res.status(500).json({ message: 'Internal Server Error', details: error.message });
-//         }
-//     }
-// }

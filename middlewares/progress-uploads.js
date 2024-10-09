@@ -3,13 +3,13 @@ const path = require('path');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, `../uploads/progress/${req.params.siteId}/${new Date()}`));
+        cb(null, path.join(__dirname, `../uploads/progress/temporary`));
     },
     filename: (req, file, cb) => {
-        cb(null, req.body.name);
+        cb(null, file.originalname);
     }
 });
 
-const uploadSite = multer({ storage: storage });
+const uploadProgressImage = multer({ storage: storage });
 
-module.exports = uploadSite;
+module.exports = uploadProgressImage;

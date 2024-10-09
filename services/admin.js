@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const fs = require('fs').promises;
+const path = require('path');
+const progressModel = require('../models/progress');
 const dailyRecordModel = require('../models/dailyrecord');
 
 exports.getEmployees = async (req, res) => {
@@ -121,4 +124,74 @@ exports.updateWorkStatus = (req, res) => {
     }
     updateDailyRecord("worksStatus", worksStatus, dailyRecordId, res);
 };
+
+exports.addProgressImage = async (req, res) => {
+    try {
+        req.body.data = JSON.parse(req.body.data);
+        const filepath = path.join(__dirname, `../uploads/progress`);
+        await createDirIfNotExists(filepath, req);
+        await moveFiles(filepath, req);
+        res.status(200).json({message: 'image upload successful'});
+    }
+    catch(error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
+        }
+        res.status(500).json({message: "Error occured while uploading image", details: error.message});
+    }
+}
+
+exports.updateProgressImage = async (req, res) => {
+    try {
+         req.body.data = JSON.parse(req.body.data);
+        const progress = req.body.data;
+        const sourceImagePath = progress.imageUrl;
+        const filepath = path.join(__dirname, `../uploads/progress`);
+        const files = await fs.readdir(`${filepath}/temporary`);
+        const targetImagePath = `${filepath}/temporary/${files[0]}`;
+        console.log(targetImagePath);
+        await fs.copyFile(sourceImagePath, targetImagePath);
+        res.status(200).json({message: 'Updated progress'});
+    }
+    catch(error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
+        }
+        else if (error.code === 11000) {
+            return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
+        } 
+        else {
+            res.status(500).json({message: "Error occured while uploading image", details: error.message});
+        }
+    }
+}
+
+const formatDate = () => {
+    const currentDate = new Date();
+
+    const day = String(currentDate.getDate()).padStart(2, '0');
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const year = currentDate.getFullYear();
+
+    return `${day}-${month}-${year}`;
+}
+
+const createDirIfNotExists = async (filepath, req) => {
+    await fs.mkdir(`${filepath}/${req.body.data.siteId}`, { recursive: true });
+    await fs.mkdir(`${filepath}/${req.body.data.siteId}/${formatDate()}`, { recursive: true });
+}
+
+const moveFiles = async (filepath, req) => {
+    const files = await fs.readdir(`${filepath}/temporary`);
+
+    for (const file of files) {
+      const oldPath = path.join(`${filepath}/temporary`, file);
+      const newPath = path.join(`${filepath}/${req.body.data.siteId}/${formatDate()}`, file);
+      const progress = req.body.data;
+      progress.imageUrl = newPath;
+      progress.date = formatDate();
+      await progressModel.create(progress);
+      await fs.rename(oldPath, newPath); 
+    }
+}
 

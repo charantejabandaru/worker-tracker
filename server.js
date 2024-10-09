@@ -9,7 +9,7 @@ app.use(cors({
     origin: '*'
 }));
 app.use(bodyparser.urlencoded({extended : true}));
-app.use(bodyparser.json());
+app.use(express.json());
 
 dotenv.config({path : './config/.env'})
 configdb();
