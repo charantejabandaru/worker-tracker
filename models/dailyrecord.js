@@ -47,7 +47,7 @@ const dailyRecordSchema = mongoose.Schema(
             type: String
         },
         date: {
-            type: Date
+            type: String
         }
     }
 );
