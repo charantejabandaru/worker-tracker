@@ -21,15 +21,15 @@ const dailyRecordSchema = mongoose.Schema(
                 type: String
             },
             timestamp: {
-                type: String
+                type: Date
             }
         }],
         checkout: [{
             location: {
-                type: String
+                type: Date
             },
             timestamp: {
-                type: String
+                type: Date
             }
         }],
         workAssigned: {
@@ -47,7 +47,7 @@ const dailyRecordSchema = mongoose.Schema(
             type: String
         },
         date: {
-            type: String
+            type: Date
         }
     }
 );
