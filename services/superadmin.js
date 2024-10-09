@@ -28,19 +28,6 @@ exports.register = async (req, res) => {
     }
 }
 
-exports.getEmployeeBySpecification = async (req, res) => {
-    try {
-        const result = await employeeModel.find({ specification: req.params.specification });
-        if (!result) {
-            return res.status(404).json({ message: `Employee with specification ${req.params.specification} not found` });
-        }
-        res.status(200).json(result);
-    }
-    catch (error) {
-        res.status(500).json({ message: "Server error occurred. Please try again later." });
-    }
-}
-
 exports.removeEmployee = async (req, res) => {
     try {
         const result = await employeeModel.deleteOne({ _id: req.params.employeeId });
