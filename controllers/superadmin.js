@@ -21,7 +21,9 @@ router.post('/dailyrecord', adminServices.addDailyRecord);
 router.post('/progressimage', progressUpload.array('photo', 12), adminServices.addProgressImage);
 router.get('/progressimage/:siteId', adminServices.getProgressBySite);
 router.put('/progressimage/:progressId', progressUpload.single('photo'), adminServices.updateProgressImage);
-
+router.put('/site/:siteId', adminServices.updateSiteBasicInfo);
+router.put('/siteadmin/add/:siteId', adminServices.addSiteAdminsIntoSite);
+router.put('/siteadmin/delete/:siteId', adminServices.deleteSiteAdminsIntoSite);
 module.exports = router;
 
 //put('/siteadmin/add/:siteId')

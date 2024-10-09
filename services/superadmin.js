@@ -85,57 +85,6 @@ exports.getSiteByLocation = async (req, res) => {
     }
 }
 
-exports.updateSite = async (req, res) => {
-    try {
-        const newSite = req.body;
-        const siteId = req.params.siteId;
-        const { progressImages } = newSite;
-        const { siteAdmins } = newSite;
-        if (progressImages) {
-            await siteAdminServices.updateProgressImages(siteId, progressImages);
-        }
-        else if (siteAdmins) {
-            try {
-                const result = await siteModel.findByIdAndUpdate(
-                    siteId,
-                    {
-                        "$push": { siteAdmins: siteAdmins }
-                    },
-                    { new: true, runValidators: true }
-                );
-                if (result) {
-                    return res.status(200).json({
-                        message: "Admins updated successfully",
-                        details: result
-                    });
-                } else {
-                    return res.status(404).json({ message: "Site Id not found" });
-                }
-            }
-            catch (error) {
-                if (error.name === 'ValidationError') {
-                    res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
-                }
-                else if (error.code === 11000) {
-                    res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
-                }
-                else {
-                    res.status(500).json({ message: 'Internal Server Error', details: error.message });
-                }
-            }
-        }
-        else {
-            const result = await siteModel.findByIdAndUpdate(siteId, newSite, { new: true, runValidators: true });
-            if (!result) {
-                return res.status(404).json({ message: `Site not found with Id ${siteId}` });
-            }
-            return res.status(200).json(result);
-        }
-    }
-    catch (error) {
-        res.status(500).json({ message: "Server error occurred. Please try again later." });
-    }
-}
 
 exports.removeSite = async (req, res) => {
     try {

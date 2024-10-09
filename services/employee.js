@@ -19,9 +19,10 @@ module.exports.checkLogin = async (req, res) => {
         }
         const result = await bcrypt.compare(password, employee.password);
         if (result) {
-            const payload = { id: employee._id, role: employee.role };
+            const payload = { role: employee.role };
             const token = jwt.sign(payload, process.env.SECRETKEY);
-            return res.status(200).json({ 'auth_token': token });
+            res.status(200).cookie('employee_details', { id: employee._id, auth_token: token }, { maxAge: 900000, httpOnly: true });
+            return res.status(200).json({ message: "LoggedIn successfully" });
         } else {
             return res.status(401).json({ message: "Invalid password" });
         }
@@ -95,7 +96,6 @@ exports.updateEmployeeById = async (req, res) => {
         else if (error.code === 11000) {
             return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
         } else {
-            console.error(error);
             return res.status(500).json({ message: "Server side error" });
         }
     }
@@ -114,15 +114,15 @@ exports.updateProfileImage = async (req, res) => {
         }
         return res.status(200).json(result);
     }
-    catch(error) {
+    catch (error) {
         if (error.name === 'ValidationError') {
             return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
         }
         else if (error.code === 11000) {
             return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
-        } 
+        }
         else {
-            res.status(500).json({message: "Error occured while uploading image", details: error.message});
+            res.status(500).json({ message: "Error occured while uploading image", details: error.message });
         }
     }
 }
@@ -153,17 +153,17 @@ module.exports.updateCheckin = async (req, res) => {
         const filepath = path.join(__dirname, `../uploads/dailyrecords`);
         await createDirIfNotExists(filepath, req);
         await moveFiles(filepath, req);
-        res.status(200).json({message: 'image upload successful'});
+        res.status(200).json({ message: 'image upload successful' });
     }
-    catch(error) {
+    catch (error) {
         if (error.name === 'ValidationError') {
             return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
         }
         else if (error.code === 11000) {
             return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
-        } 
+        }
         else {
-            res.status(500).json({message: "Error occured while uploading image", details: error.message});
+            res.status(500).json({ message: "Error occured while uploading image", details: error.message });
         }
     }
 };
@@ -181,9 +181,9 @@ module.exports.updateCheckout = async (req, res) => {
             },
             { new: true, runValidators: true }
         );
-        res.status(200).json({message: 'Updated successfully'});
+        res.status(200).json({ message: 'Updated successfully' });
     }
-    catch(error) {
+    catch (error) {
         if (error.name === 'ValidationError') {
             return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
         }
@@ -217,23 +217,23 @@ const moveFiles = async (filepath, req) => {
     const oldFiles = await fs.readdir(`${filepath}/${formatDate()}/${req.body.data.employeeId}/${req.params.dailyRecordId}`);
 
     for (const file of files) {
-      const oldPath = path.join(`${filepath}/temporary`, file);
-      const newPath = path.join(`${filepath}/${formatDate()}/${req.body.data.employeeId}/${req.params.dailyRecordId}`, `${oldFiles.length+1}${path.extname(file)}`);
+        const oldPath = path.join(`${filepath}/temporary`, file);
+        const newPath = path.join(`${filepath}/${formatDate()}/${req.body.data.employeeId}/${req.params.dailyRecordId}`, `${oldFiles.length + 1}${path.extname(file)}`);
 
-      const checkin = {
-        imageUrl : newPath,
-        location: req.body.data.location,
-        timestamp: formatDate()
-      }
-      await dailyRecordModel.findByIdAndUpdate(
-        req.params.dailyRecordId,
-        {
-             "$push": { checkin: checkin } 
-        },
-        { new: true, runValidators: true }
-      );
-      
-      await fs.rename(oldPath, newPath); 
+        const checkin = {
+            imageUrl: newPath,
+            location: req.body.data.location,
+            timestamp: formatDate()
+        }
+        await dailyRecordModel.findByIdAndUpdate(
+            req.params.dailyRecordId,
+            {
+                "$push": { checkin: checkin }
+            },
+            { new: true, runValidators: true }
+        );
+
+        await fs.rename(oldPath, newPath);
     }
 }
 
