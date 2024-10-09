@@ -4,6 +4,7 @@ const path = require('path');
 const progressModel = require('../models/progress');
 const dailyRecordModel = require('../models/dailyrecord');
 const employeeModel = require('../models/employee');
+const siteModel = require('../models/site');
 
 exports.getEmployees = async (req, res) => {
     try {
@@ -54,11 +55,11 @@ exports.getEmployeeStatus = async (req, res) => {
 };
 
 exports.getLastAssignedWoryByEmployeeId = async (req, res) => {
-    const { employeeId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(employeeId)) {
-        return res.status(400).json({ message: 'Invalid ID format' });
-    }
     try {
+        const { employeeId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(employeeId)) {
+            return res.status(400).json({ message: 'Invalid ID format' });
+        }
         const dailyRecord = await dailyRecordModel.find({
             employeeId: employeeId
         }).sort({
@@ -66,17 +67,16 @@ exports.getLastAssignedWoryByEmployeeId = async (req, res) => {
         }).limit(1);
         return res.status(200).json({ "result": dailyRecord });
     } catch (error) {
-        console.log(error);
         return res.status(500).json({ message: "Server side error" });
     }
 };
 
 exports.getSiteBySiteId = async (req, res) => {
-    const { siteId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(siteId)) {
-        return res.status(400).json({ message: 'Invalid ID format' });
-    }
     try {
+        const { siteId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(siteId)) {
+            return res.status(400).json({ message: 'Invalid ID format' });
+        }
         const site = await siteModel.findById(siteId);
         if (site) {
             return res.status(200).json(site);
@@ -84,8 +84,112 @@ exports.getSiteBySiteId = async (req, res) => {
             return res.status(404).json({ message: "Site Id not found" });
         }
     } catch (error) {
-        console.error(error);
         return res.status(500).json({ message: "Server side error" });
+    }
+};
+
+exports.updateSiteBasicInfo = async (req, res) => {
+    try {
+        const { siteId } = req.params;
+        const newSiteDetails = req.body;
+        if (!mongoose.Types.ObjectId.isValid(siteId)) {
+            return res.status(400).json({ message: 'Invalid ID format' });
+        }
+        if (!newSiteDetails) {
+            return res.status(400).json({ message: "No data in request body" });
+        }
+        delete newSiteDetails.siteAdmins;
+        const result = await siteModel.findByIdAndUpdate(siteId, newSiteDetails, { new: true, runValidators: true });
+        if (!result) {
+            return res.status(404).json({ messsage: "Site Id not found" });
+        }
+        return res.status(200).json({ message: "Successfully updated site details" });
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
+        }
+        else if (error.code === 11000) {
+            return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
+        }
+        else {
+            res.status(500).json({ message: "Error occured while uploading image", details: error.message });
+        }
+    }
+};
+
+exports.addSiteAdminsIntoSite = async (req, res) => {
+    try {
+        const { siteId } = req.params;
+        const { siteAdmins } = req.body;
+        if (!mongoose.Types.ObjectId.isValid(siteId)) {
+            return res.status(400).json({ message: 'Invalid ID format' });
+        }
+        if (!siteAdmins) {
+            return res.status(400).json({ message: "No siteadmins data in the request body" });
+        }
+        const result = await siteModel.findByIdAndUpdate(
+            siteId,
+            {
+                "$push": {
+                    siteAdmins: {
+                        "$each": siteAdmins
+                    }
+                }
+            },
+            { new: true, runValidators: true }
+        );
+        if (!result) {
+            return res.status(404).json({ message: "Site Id not found" });
+        }
+        return res.status(200).json({ message: "Site admins added successfully into site" });
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
+        }
+        else if (error.code === 11000) {
+            return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
+        }
+        else {
+            res.status(500).json({ message: "Error occured while uploading image", details: error.message });
+        }
+    }
+};
+
+exports.deleteSiteAdminsIntoSite = async (req, res) => {
+    try {
+        const { siteId } = req.params;
+        const { siteAdmins } = req.body;
+        if (!mongoose.Types.ObjectId.isValid(siteId)) {
+            return res.status(400).json({ message: 'Invalid ID format' });
+        }
+        if (!siteAdmins) {
+            return res.status(400).json({ message: "No siteadmins data in the request body" });
+        }
+        const result = await siteModel.findByIdAndUpdate(
+            siteId,
+            {
+                "$pull": {
+                    siteAdmins: {
+                        "$in": siteAdmins
+                    }
+                }
+            },
+            { new: true, runValidators: true }
+        );
+        if (!result) {
+            return res.status(404).json({ message: "Site Id not found" });
+        }
+        return res.status(200).json({ message: "Site admins deleted successfully from site" });
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
+        }
+        else if (error.code === 11000) {
+            return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
+        }
+        else {
+            res.status(500).json({ message: "Error occured while uploading image", details: error.message });
+        }
     }
 };
 
@@ -115,17 +219,16 @@ exports.addDailyRecord = async (req, res) => {
 };
 
 exports.getSitesBySiteAdminId = async (req, res) => {
-    const { employeeId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(employeeId)) {
-        return res.status(400).json({ message: 'Invalid ID format' });
-    }
     try {
+        const { employeeId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(employeeId)) {
+            return res.status(400).json({ message: 'Invalid ID format' });
+        }
         const sites = await siteModel.find({
             siteAdmins: employeeId
         });
         return res.status(200).json({ sites: sites });
     } catch (error) {
-        console.error(error);
         return res.status(500).json({ message: "Server side error" });
     }
 };
@@ -145,19 +248,19 @@ exports.addProgressImage = async (req, res) => {
         const filepath = path.join(__dirname, `../uploads/progress`);
         await createDirIfNotExists(filepath, req);
         await moveFiles(filepath, req);
-        res.status(200).json({message: 'image upload successful'});
+        res.status(200).json({ message: 'image upload successful' });
     }
-    catch(error) {
+    catch (error) {
         if (error.name === 'ValidationError') {
             return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
         }
-        res.status(500).json({message: "Error occured while uploading image", details: error.message});
+        res.status(500).json({ message: "Error occured while uploading image", details: error.message });
     }
 }
 
 exports.updateProgressImage = async (req, res) => {
     try {
-         req.body.data = JSON.parse(req.body.data);
+        req.body.data = JSON.parse(req.body.data);
         const progress = req.body.data;
         const targetImagePath = progress.imageUrl;
         const filepath = path.join(__dirname, `../uploads/progress`);
@@ -167,15 +270,15 @@ exports.updateProgressImage = async (req, res) => {
         await fs.unlink(`${filepath}/temporary/${files[0]}`);
         res.status(200).json({message: 'Updated progress image successfully'});
     }
-    catch(error) {
+    catch (error) {
         if (error.name === 'ValidationError') {
             return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
         }
         else if (error.code === 11000) {
             return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
-        } 
+        }
         else {
-            res.status(500).json({message: "Error occured while uploading image", details: error.message});
+            res.status(500).json({ message: "Error occured while uploading image", details: error.message });
         }
     }
 }
@@ -199,13 +302,13 @@ const moveFiles = async (filepath, req) => {
     const files = await fs.readdir(`${filepath}/temporary`);
 
     for (const file of files) {
-      const oldPath = path.join(`${filepath}/temporary`, file);
-      const newPath = path.join(`${filepath}/${req.body.data.siteId}/${formatDate()}`, file);
-      const progress = req.body.data;
-      progress.imageUrl = newPath;
-      progress.date = formatDate();
-      await progressModel.create(progress);
-      await fs.rename(oldPath, newPath); 
+        const oldPath = path.join(`${filepath}/temporary`, file);
+        const newPath = path.join(`${filepath}/${req.body.data.siteId}/${formatDate()}`, file);
+        const progress = req.body.data;
+        progress.imageUrl = newPath;
+        progress.date = formatDate();
+        await progressModel.create(progress);
+        await fs.rename(oldPath, newPath);
     }
 }
 

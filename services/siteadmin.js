@@ -15,7 +15,6 @@ exports.getDailyRecordsBySiteId = async (req, res) => {
         }).populate('employeeId');
         return res.status(200).json({ dailyRecords: dailyRecords });
     } catch (error) {
-        console.log(error);
         return res.status(500).json({ message: "Server side error" });
     }
 }

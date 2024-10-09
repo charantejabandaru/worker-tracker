@@ -8,7 +8,7 @@ const isAuth = require('../middlewares/isAuth');
 employeeRouter.post('/login', employeeServices.checkLogin);
 employeeRouter.put('/employee/profile/:employeeId',uploadEmployeeProfile.single('photo'), employeeServices.updateProfileImage);
 employeeRouter.get('/employee/:employeeId', employeeServices.getEmployeeById);
-employeeRouter.put('/employee/:employeeId', isAuth(['superAdmin', 'technician']), employeeServices.updateEmployeeById);
+employeeRouter.put('/employee/:employeeId', employeeServices.updateEmployeeById);
 employeeRouter.get('/employee/dailyRecord/:employeeId', employeeServices.getTasksById);
 employeeRouter.put('/checkin/:dailyRecordId', uploadRecord.single('photo'), employeeServices.updateCheckin);
 employeeRouter.put('/checkout/:dailyRecordId', employeeServices.updateCheckout);
