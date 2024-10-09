@@ -10,7 +10,7 @@
 
 const express = require('express');
 const siteAdminRouter = express.Router();
-const siteAdminService = require('../services/siteadmin');
+const siteAdminServices = require('../services/siteadmin');
 const adminServices = require('../services/admin');
 
 
@@ -23,10 +23,10 @@ siteAdminRouter.put('/workstatus/:dailyRecordId', adminServices.updateWorkStatus
 // siteAdminRouter.put('/assignwork/:dailyRecordId', siteAdminService.updateWorkAssigned);
 // siteAdminRouter.put('/progress/:siteId', siteAdminService.updateProgress);
 siteAdminRouter.get('/dailyrecord/lastassigned/:employeeId', adminServices.getLastAssignedWoryByEmployeeId);
+siteAdminRouter.get('/dailyrecord/site/all/:siteId', siteAdminServices.getAllDailyRecordsBySite);
+siteAdminRouter.get('/dailyrecord/site/now/:siteId', siteAdminServices.getTodayDailyRecordsBySite);
+
 module.exports = siteAdminRouter;
-
-//get('/dailyrecord/site/:siteId');
-
 
 //This are common for super admin and site admin
 //
