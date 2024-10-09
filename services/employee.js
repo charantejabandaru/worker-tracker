@@ -172,7 +172,7 @@ module.exports.updateCheckout = async (req, res) => {
     try {
         const checkout = {
             location: req.body.location,
-            timestamp: formatDate
+            timestamp: new Date()
         }
         await dailyRecordModel.findByIdAndUpdate(
             req.params.dailyRecordId,
@@ -223,7 +223,7 @@ const moveFiles = async (filepath, req) => {
         const checkin = {
             imageUrl: newPath,
             location: req.body.data.location,
-            timestamp: formatDate()
+            timestamp: new Date()
         }
         await dailyRecordModel.findByIdAndUpdate(
             req.params.dailyRecordId,

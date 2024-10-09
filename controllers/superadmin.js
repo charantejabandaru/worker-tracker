@@ -17,7 +17,9 @@ router.get('/site/location/:location', superAdminServices.getSiteByLocation);
 //router.put('/site/:siteId', superAdminServices.updateSite);
 router.delete('/site/:siteId', superAdminServices.removeSite);
 router.post('/dailyrecord', adminServices.addDailyRecord);
-// router.delete('/dailyrecord/:dailyRecordId', superAdminServices.removeDailyRecord);
+router.get('/dailyrecord/all', superAdminServices.getAllDailyRecords);
+router.get('/dailyrecord/now', superAdminServices.getTodayDailyRecords);
+router.delete('/dailyrecord/:dailyRecordId', superAdminServices.removeDailyRecord);
 router.post('/progressimage', progressUpload.array('photo', 12), adminServices.addProgressImage);
 router.get('/progressimage/:siteId', adminServices.getProgressBySite);
 router.put('/progressimage/:progressId', progressUpload.single('photo'), adminServices.updateProgressImage);
@@ -38,8 +40,8 @@ module.exports = router;
 //put('/siteadmin/remark/:dailyRecordId')
 //delete('/progressimage/:progressId')
 //get('/sites/admin/:employeeId')
-//get('/dailyrecord/now/:siteId')
-//get('/dailyrecord/all/:siteId')
+//get('/dailyrecord/now/')
+//get('/dailyrecord/all/')
 
 //Common for all users
 //

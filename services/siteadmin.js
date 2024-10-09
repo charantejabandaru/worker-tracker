@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const fs = require('fs').promises;
+const path = require('path');
 const siteModel = require('../models/site');
 const dailyRecordModel = require('../models/dailyrecord');
 const updateDailyRecord = require('./update-daily-record');
@@ -90,5 +92,76 @@ exports.updateProgressImages = async (siteId, progressImages) => {
         }
     } else {
         return res.status(400).json({ message: "Body data not found" });
+    }
+}
+
+exports.getAllDailyRecordsBySite = async (req, res) => {
+    try {
+        const results = await dailyRecordModel.find({sitedId: req.params.siteId});
+        if (results.length === 0) {
+            return res.status(404).json({ message: `Records with siteId ${req.params.siteId} not found` });
+        }
+        await setCheckinImagesIfExist(results);
+        res.status(200).json(results);
+    }
+    catch(errro) {
+        res.status(500).json({ message: "Server error. Could not fetch resources." });
+    }
+}
+
+exports.getTodayDailyRecordsBySite = async (req, res) => {
+    try {
+        const results = await dailyRecordModel.find({
+            date: {
+                $gte: new Date().setUTCHours(0,0,0,0)
+            },
+            siteId : req.params.siteId
+        });
+        if (results.length === 0) {
+            return res.status(404).json({ message: `Records with siteId ${req.params.siteId} not found` });
+        }
+        await setCheckinImagesIfExist(results);
+        res.status(200).json(results);
+    }
+    catch(errro) {
+        res.status(500).json({ message: "Server error. Could not fetch resources." });
+    }
+}
+
+const setCheckinImagesIfExist = async (results) => {
+    const dailyRecords = await Promise.all(
+        results.map(async (result) => {
+            if (result.checkin) {
+                const checkin = await Promise.all(result.checkin.map(async (entry) => {
+                    const imageData = await fs.readFile(entry.imageUrl);
+                    const ext = path.extname(entry.imageUrl);
+                    const mimeType = getMimeType(ext);
+                    const base64Image = Buffer.from(imageData).toString('base64');
+                    const obj = {
+                        image: `data:${mimeType};base64,${base64Image}`,
+                        location: entry.location,
+                        timestamp: entry.timestamp
+                    };
+                    return obj;
+                }));
+                result.checkin = checkin;
+            }
+            return result;
+        })
+    );    
+    return dailyRecords;
+}
+
+function getMimeType(ext) {
+    switch (ext) {
+        case '.png':
+            return 'image/png';
+        case '.jpg':
+        case '.jpeg':
+            return 'image/jpeg';
+        case '.svg':
+            return 'image/svg+xml';
+        default:
+            return 'application/octet-stream';
     }
 }
