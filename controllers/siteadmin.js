@@ -43,20 +43,6 @@ module.exports = siteAdminRouter;
 //delete('/progressimage/:progressId')--
 //post('/progressimage')--
 //get('/sites/admin/:employeeId') 1
-//get('/employee')
-//get('/employee/role/:role')
-//get('/employee/status/:status')
-//get('/dailyrecord/lastassigned/:employeeId')
-//post('/dailyrecord')
-//put('/dailyrecord/:dailyRecordId')
-//get('/site/id/:siteId')
-//put('/siteadmin/remark/:dailyRecordId')
-//get('/progressimage/:siteId')
-//put('/progressimage/:progressId')
-//delete('/progressimage/:progressId')
-//post('/progressimage')
-//get('/sites/admin/:employeeId')
-//delete('/dailyrecord/:dailyRecordId');
 
 //Common for all users
 //

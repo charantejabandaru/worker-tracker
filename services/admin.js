@@ -3,11 +3,16 @@ const fs = require('fs').promises;
 const path = require('path');
 const progressModel = require('../models/progress');
 const dailyRecordModel = require('../models/dailyrecord');
+const employeeModel = require('../models/employee');
 
 exports.getEmployees = async (req, res) => {
     try {
-        const result = await employeeModel.find({});
-        res.status(200).json(result);
+        const results = await employeeModel.find({});
+        const employees = results.map((result) => {
+            const {_id, name, email, mobile, role, skill, status } = result;
+            return {_id, name, email, mobile, role, skill, status };
+        });
+        res.status(200).json(employees);
     }
     catch (error) {
         res.status(500).json({ message: "Server error. Could not fetch resources." });
@@ -16,11 +21,15 @@ exports.getEmployees = async (req, res) => {
 
 exports.getEmployeeByRole = async (req, res) => {
     try {
-        const result = await employeeModel.find({ role: req.params.role });
-        if (!result) {
+        const results = await employeeModel.find({ role: req.params.role });
+        if (results.length === 0) {
             return res.status(404).json({ message: `Employee with role ${req.params.role} not found` });
         }
-        res.status(200).json(result);
+        const employees = results.map((result) => {
+            const {_id, name, email, mobile, role, skill, status } = result;
+            return {_id, name, email, mobile, role, skill, status };
+        });
+        res.status(200).json(employees);
     }
     catch (error) {
         res.status(500).json({ message: "Server error occurred. Please try again later." });
@@ -29,10 +38,15 @@ exports.getEmployeeByRole = async (req, res) => {
 
 exports.getEmployeeStatus = async (req, res) => {
     try {
-        const result = await employeeModel.find({ status: req.params.status });
-        if (!result) {
+        const results = await employeeModel.find({ status: req.params.status });
+        if (results.length === 0) {
             return res.status(404).json({ message: `No one with status ${req.params.status}` });
         }
+        const employees = results.map((result) => {
+            const {_id, name, email, mobile, role, skill, status } = result;
+            return {_id, name, email, mobile, role, skill, status };
+        });
+        res.status(200).json(employees);
     }
     catch (error) {
         res.status(500).json({ message: "Server error occurred. Please try again later." });
@@ -145,13 +159,13 @@ exports.updateProgressImage = async (req, res) => {
     try {
          req.body.data = JSON.parse(req.body.data);
         const progress = req.body.data;
-        const sourceImagePath = progress.imageUrl;
+        const targetImagePath = progress.imageUrl;
         const filepath = path.join(__dirname, `../uploads/progress`);
         const files = await fs.readdir(`${filepath}/temporary`);
-        const targetImagePath = `${filepath}/temporary/${files[0]}`;
-        console.log(targetImagePath);
+        const sourceImagePath = `${filepath}/temporary/${files[0]}`;
         await fs.copyFile(sourceImagePath, targetImagePath);
-        res.status(200).json({message: 'Updated progress'});
+        await fs.unlink(`${filepath}/temporary/${files[0]}`);
+        res.status(200).json({message: 'Updated progress image successfully'});
     }
     catch(error) {
         if (error.name === 'ValidationError') {
@@ -192,6 +206,19 @@ const moveFiles = async (filepath, req) => {
       progress.date = formatDate();
       await progressModel.create(progress);
       await fs.rename(oldPath, newPath); 
+    }
+}
+
+exports.getProgressBySite = async (req, res) => {
+    try {
+        const result = await progressModel.find({siteId: req.params.siteId});
+        if (!result) {
+            return res.status(404).json({ message: "No progress foound with siteId " + req.params.siteId });
+        }
+        res.status(200).json(result);
+    }
+    catch(error) {
+        res.status(500).json({message: "Internal server error"});
     }
 }
 

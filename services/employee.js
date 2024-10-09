@@ -7,7 +7,6 @@ const employeeModel = require('../models/employee');
 const dailyRecordModel = require('../models/dailyrecord');
 const updateDailyRecord = require('./update-daily-record');
 
-
 module.exports.checkLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -39,14 +38,37 @@ module.exports.getEmployeeById = async (req, res) => {
         }
         const employee = await employeeModel.findById(employeeId);
         if (employee) {
-            return res.status(200).json(employee);
+            const {_id, name, email, mobile, role, skill, status , profilePhoto} = employee;
+
+            const imageData  = await fs.readFile(profilePhoto.imageUrl);
+            const ext = path.extname(profilePhoto.imageUrl);
+            const mimeType = getMimeType(ext);
+            const base64Image = Buffer.from(imageData).toString('base64');
+            const profilePicture = `data:${mimeType};base64,${base64Image}`;
+
+            const result = {_id, name, email, mobile, role, skill, status , profilePicture};
+            return res.status(200).json(result);
         } else {
             return res.status(404).json({ message: "Employee Id not found" });
         }
     } catch (error) {
-        return res.status(500).json({ message: "Server side error" });
+        return res.status(500).json({ message: "Server side error" , details: error.message});
     }
 };
+
+function getMimeType(ext) {
+    switch (ext) {
+        case '.png':
+            return 'image/png';
+        case '.jpg':
+        case '.jpeg':
+            return 'image/jpeg';
+        case '.svg':
+            return 'image/svg+xml';
+        default:
+            return 'application/octet-stream';
+    }
+}
 
 exports.updateEmployeeById = async (req, res) => {
     try {
