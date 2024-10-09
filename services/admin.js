@@ -10,8 +10,8 @@ exports.getEmployees = async (req, res) => {
     try {
         const results = await employeeModel.find({});
         const employees = results.map((result) => {
-            const {_id, name, email, mobile, role, skill, status } = result;
-            return {_id, name, email, mobile, role, skill, status };
+            const { _id, name, email, mobile, role, skill, status } = result;
+            return { _id, name, email, mobile, role, skill, status };
         });
         res.status(200).json(employees);
     }
@@ -27,8 +27,8 @@ exports.getEmployeeByRole = async (req, res) => {
             return res.status(404).json({ message: `Employee with role ${req.params.role} not found` });
         }
         const employees = results.map((result) => {
-            const {_id, name, email, mobile, role, skill, status } = result;
-            return {_id, name, email, mobile, role, skill, status };
+            const { _id, name, email, mobile, role, skill, status } = result;
+            return { _id, name, email, mobile, role, skill, status };
         });
         res.status(200).json(employees);
     }
@@ -44,8 +44,8 @@ exports.getEmployeeStatus = async (req, res) => {
             return res.status(404).json({ message: `No one with status ${req.params.status}` });
         }
         const employees = results.map((result) => {
-            const {_id, name, email, mobile, role, skill, status } = result;
-            return {_id, name, email, mobile, role, skill, status };
+            const { _id, name, email, mobile, role, skill, status } = result;
+            return { _id, name, email, mobile, role, skill, status };
         });
         res.status(200).json(employees);
     }
@@ -205,6 +205,7 @@ exports.updateRemark = (req, res) => {
 exports.addDailyRecord = async (req, res) => {
     try {
         const dailyRecord = req.body;
+        dailyRecord.date = formatDate();
         await dailyRecordModel.create(dailyRecord);
         res.status(201).json({ message: 'Record added successfully' });
     }
@@ -268,7 +269,7 @@ exports.updateProgressImage = async (req, res) => {
         const sourceImagePath = `${filepath}/temporary/${files[0]}`;
         await fs.copyFile(sourceImagePath, targetImagePath);
         await fs.unlink(`${filepath}/temporary/${files[0]}`);
-        res.status(200).json({message: 'Updated progress image successfully'});
+        res.status(200).json({ message: 'Updated progress image successfully' });
     }
     catch (error) {
         if (error.name === 'ValidationError') {
@@ -314,14 +315,41 @@ const moveFiles = async (filepath, req) => {
 
 exports.getProgressBySite = async (req, res) => {
     try {
-        const result = await progressModel.find({siteId: req.params.siteId});
-        if (!result) {
+        const results = await progressModel.find({ siteId: req.params.siteId });
+        if (results.length === 0) {
             return res.status(404).json({ message: "No progress foound with siteId " + req.params.siteId });
         }
-        res.status(200).json(result);
+        const progressImages = await Promise.all(
+            results.map(async (result) => {
+                const imageData = await fs.readFile(result.imageUrl);
+                const ext = path.extname(result.imageUrl);
+                const mimeType = getMimeType(ext);
+                const base64Image = Buffer.from(imageData).toString('base64');
+                const progressImage = `data:${mimeType};base64,${base64Image}`;
+                
+                const { siteId, name, comments, date } = result;
+                return { siteId, name, comments, date, progressImage };
+            })
+        );
+        
+        res.status(200).json(progressImages);
     }
-    catch(error) {
-        res.status(500).json({message: "Internal server error"});
+    catch (error) {
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+function getMimeType(ext) {
+    switch (ext) {
+        case '.png':
+            return 'image/png';
+        case '.jpg':
+        case '.jpeg':
+            return 'image/jpeg';
+        case '.svg':
+            return 'image/svg+xml';
+        default:
+            return 'application/octet-stream';
     }
 }
 

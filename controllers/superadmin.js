@@ -38,6 +38,8 @@ module.exports = router;
 //put('/siteadmin/remark/:dailyRecordId')
 //delete('/progressimage/:progressId')
 //get('/sites/admin/:employeeId')
+//get('/dailyrecord/now/:siteId')
+//get('/dailyrecord/all/:siteId')
 
 //Common for all users
 //

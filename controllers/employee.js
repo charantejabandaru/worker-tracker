@@ -16,6 +16,8 @@ employeeRouter.put('/employee/remark/:dailyRecordId', employeeServices.updateEmp
 
 module.exports = employeeRouter;
 
+//get('/dailyrecord/employee/now/:employeeId')
+
 //Common for all users
 //
 //put('/workstatus/:dailyRecordId') 1
