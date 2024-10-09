@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const siteModel = require('../models/site');
 const dailyRecordModel = require('../models/dailyrecord');
-// const resourceModel = require('../models/resource');
 const updateDailyRecord = require('./update-daily-record');
 
 
@@ -33,24 +32,25 @@ const errorHandler = (error, res) => {
     }
 }
 
-// module.exports.createRequest = async (req, res) => {
-//     const data = req.body;
-//     if (data) {
-//         try {
-//             const result = await resourceModel.create(data);
-//             return res.status(201).json({
-//                 message: "Request created successfully",
-//                 details: result
-//             });
-//         } catch (error) {
-//             errorHandler(error, res);
-//         }
-//     } else {
-//         return res.status(400).json({ message: "Bad request: No body data" });
-//     }
-// };
+module.exports.updateRemark = (req, res) => {
+    const { dailyRecordId } = req.params;
+    const { adminRemark } = req.body;
+    if (!mongoose.Types.ObjectId.isValid(dailyRecordId)) {
+        return res.status(400).json({ message: 'Invalid ID format' });
+    }
+    updateDailyRecord("adminRemark", adminRemark, dailyRecordId, res);
+};
 
-exports.updateWorkAssigned = (req, res) => {
+module.exports.updateWorkStatus = (req, res) => {
+    const { dailyRecordId } = req.params;
+    const { worksStatus } = req.body;
+    if (!mongoose.Types.ObjectId.isValid(dailyRecordId)) {
+        return res.status(400).json({ message: 'Invalid ID format' });
+    }
+    updateDailyRecord("worksStatus", worksStatus, dailyRecordId, res);
+};
+
+module.exports.updateWorkAssigned = (req, res) => {
     const { dailyRecordId } = req.params;
     const { workAssigned } = req.body;
     if (!mongoose.Types.ObjectId.isValid(dailyRecordId)) {

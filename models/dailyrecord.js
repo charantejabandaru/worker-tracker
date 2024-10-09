@@ -21,7 +21,7 @@ const dailyRecordSchema = mongoose.Schema(
                 type: String
             },
             timestamp: {
-                type: Date
+                type: String
             }
         }],
         checkout: [{
@@ -29,7 +29,7 @@ const dailyRecordSchema = mongoose.Schema(
                 type: String
             },
             timestamp: {
-                type: Date
+                type: String
             }
         }],
         workAssigned: {
@@ -47,8 +47,7 @@ const dailyRecordSchema = mongoose.Schema(
             type: String
         },
         date: {
-            type: Date,
-            default: Date.now
+            type: Date
         }
     }
 );

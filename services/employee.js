@@ -1,9 +1,12 @@
 const mongoose = require('mongoose');
+const fs = require('fs').promises;
+const path = require('path');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const employeeModel = require('../models/employee');
 const dailyRecordModel = require('../models/dailyrecord');
 const updateDailyRecord = require('./update-daily-record');
+
 
 module.exports.checkLogin = async (req, res) => {
     try {
@@ -76,21 +79,37 @@ exports.updateEmployeeById = async (req, res) => {
     }
 };
 
-// exports.updateEmployee = async (req, res) => {
-//     try {
-//         const newEmployee = req.body;
-//         const result = await employeeModel.findByIdAndUpdate(req.params.employeeId, newEmployee, { new: true, runValidators: true });
-//         if (!result) {
-//             return res.status(404).json({ message: `Employee not found with Id ${req.params.employeeId}` });
-//         }
-//         return res.status(200).json(result);
-//     }
-//     catch (error) {
-//         res.status(500).json({ message: "Server error occurred. Please try again later." });
-//     }
-// }
+exports.updateProfileImage = async (req, res) => {
+    try {
+        const newEmployee = {
+            profilePhoto: {
+                imageUrl: path.join(__dirname, `../uploads/employees/${req.params.employeeId}/${req.filename}`)
+            }
+        }
+        const result = await employeeModel.findByIdAndUpdate(req.params.employeeId, newEmployee, { new: true, runValidators: true });
+        if (!result) {
+            return res.status(404).json({ message: `Employee not found with Id ${req.params.employeeId}` });
+        }
+        return res.status(200).json(result);
+    }
+    catch(error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
+        }
+        else if (error.code === 11000) {
+            return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
+        } 
+        else {
+            res.status(500).json({message: "Error occured while uploading image", details: error.message});
+        }
+    }
+}
 
-exports.getTasksById = async (req, res) => {
+module.exports.getTasksById = async (req, res) => {
+    const { employeeId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(employeeId)) {
+        return res.status(400).json({ message: 'Invalid ID format' });
+    }
     try {
         const { employeeId } = req.params;
         if (!mongoose.Types.ObjectId.isValid(employeeId)) {
@@ -106,25 +125,97 @@ exports.getTasksById = async (req, res) => {
 };
 
 
-exports.updateCheckin = (req, res) => {
-    const { dailyRecordId } = req.params;
-    const { checkin } = req.body;
-    if (!mongoose.Types.ObjectId.isValid(dailyRecordId)) {
-        return res.status(400).json({ message: 'Invalid ID format' });
+module.exports.updateCheckin = async (req, res) => {
+    try {
+        req.body.data = JSON.parse(req.body.data);
+        const filepath = path.join(__dirname, `../uploads/dailyrecords`);
+        await createDirIfNotExists(filepath, req);
+        await moveFiles(filepath, req);
+        res.status(200).json({message: 'image upload successful'});
     }
-    updateDailyRecord("checkin", checkin, dailyRecordId, res);
+    catch(error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
+        }
+        else if (error.code === 11000) {
+            return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
+        } 
+        else {
+            res.status(500).json({message: "Error occured while uploading image", details: error.message});
+        }
+    }
 };
 
-exports.updateCheckout = (req, res) => {
-    const { dailyRecordId } = req.params;
-    const { checkout } = req.body;
-    if (!mongoose.Types.ObjectId.isValid(dailyRecordId)) {
-        return res.status(400).json({ message: 'Invalid ID format' });
+module.exports.updateCheckout = async (req, res) => {
+    try {
+        const checkout = {
+            location: req.body.location,
+            timestamp: formatDate
+        }
+        await dailyRecordModel.findByIdAndUpdate(
+            req.params.dailyRecordId,
+            {
+                "$push": { checkout: checkout }
+            },
+            { new: true, runValidators: true }
+        );
+        res.status(200).json({message: 'Updated successfully'});
     }
-    updateDailyRecord("checkout", checkout, dailyRecordId, res);
+    catch(error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
+        }
+        else if (error.code === 11000) {
+            return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
+        } else {
+            console.error(error);
+            return res.status(500).json({ message: "Server side error" });
+        }
+    }
 };
 
-exports.updateEmployeeRemark = (req, res) => {
+const createDirIfNotExists = async (filepath, req) => {
+    await fs.mkdir(`${filepath}/${formatDate()}`, { recursive: true });
+    await fs.mkdir(`${filepath}/${formatDate()}/${req.body.data.employeeId}`, { recursive: true });
+    await fs.mkdir(`${filepath}/${formatDate()}/${req.body.data.employeeId}/${req.params.dailyRecordId}`, { recursive: true });
+}
+
+const formatDate = () => {
+    const currentDate = new Date();
+
+    const day = String(currentDate.getDate()).padStart(2, '0');
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const year = currentDate.getFullYear();
+
+    return `${day}-${month}-${year}`;
+}
+
+const moveFiles = async (filepath, req) => {
+    const files = await fs.readdir(`${filepath}/temporary`);
+    const oldFiles = await fs.readdir(`${filepath}/${formatDate()}/${req.body.data.employeeId}/${req.params.dailyRecordId}`);
+
+    for (const file of files) {
+      const oldPath = path.join(`${filepath}/temporary`, file);
+      const newPath = path.join(`${filepath}/${formatDate()}/${req.body.data.employeeId}/${req.params.dailyRecordId}`, `${oldFiles.length+1}${path.extname(file)}`);
+
+      const checkin = {
+        imageUrl : newPath,
+        location: req.body.data.location,
+        timestamp: formatDate()
+      }
+      await dailyRecordModel.findByIdAndUpdate(
+        req.params.dailyRecordId,
+        {
+             "$push": { checkin: checkin } 
+        },
+        { new: true, runValidators: true }
+      );
+      
+      await fs.rename(oldPath, newPath); 
+    }
+}
+
+module.exports.updateEmployeeRemark = (req, res) => {
     const { dailyRecordId } = req.params;
     const { technicianRemark } = req.body;
     if (!mongoose.Types.ObjectId.isValid(dailyRecordId)) {
