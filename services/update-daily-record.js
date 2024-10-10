@@ -1,17 +1,14 @@
 const dailyRecordModel = require('../models/dailyrecord');
 
-module.exports = async (fieldName, value, dailyRecordId, res) => {
-    if (!value) {
-        return res.status(400).json({ message: "Body data not found" })
-    }
+exports.updateDailyRecord = async (req, res) => {
     try {
-        const result = await dailyRecordModel.findByIdAndUpdate(dailyRecordId,
-            { [fieldName]: value },
+        const result = await dailyRecordModel.findByIdAndUpdate(req.params.dailyRecordId,
+            req.body,
             { new: true, runValidators: true }
         )
         if (result) {
             return res.status(200).json({
-                "message": `${fieldName} updated successfully`,
+                "message": `Record updated successfully`,
                 "details": result
             });
         } else {
