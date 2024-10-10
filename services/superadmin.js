@@ -4,11 +4,8 @@ const bcrypt = require('bcrypt');
 const employeeModel = require('../models/employee');
 const siteModel = require('../models/site');
 const dailyRecordModel = require('../models/dailyrecord');
-<<<<<<< Updated upstream
 const siteAdminServices = require('./siteadmin');
 const logService = require('./log');
-=======
->>>>>>> Stashed changes
 
 exports.register = async (req, res) => {
     const employee = req.body;
