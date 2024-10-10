@@ -244,7 +244,7 @@ const getLogsByCondition = async (res, condition) => {
     return res.status(200).json({ logs });
 }
 
-exports.getLogs = (req, res) => {
+exports.getAllLogs = (req, res) => {
     try {
         getLogsByCondition(res, {});
     } catch (error) {
