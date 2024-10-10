@@ -221,7 +221,7 @@ exports.updateRemark = (req, res) => {
 exports.addDailyRecord = async (req, res) => {
     try {
         const dailyRecord = req.body;
-        dailyRecord.date = formatDate();
+        dailyRecord.date = new Date();
         await dailyRecordModel.create(dailyRecord);
         await logService({
             modifierId: req.cookies.employee_details.id,

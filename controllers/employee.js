@@ -7,16 +7,19 @@ const isAuth = require('../middlewares/isAuth');
 
 employeeRouter.post('/login', employeeServices.checkLogin);
 employeeRouter.put('/employee/profile/:employeeId',uploadEmployeeProfile.single('photo'), employeeServices.updateProfileImage);
+employeeRouter.delete('/')
 employeeRouter.get('/employee/:employeeId', employeeServices.getEmployeeById);
 employeeRouter.put('/employee/:employeeId', employeeServices.updateEmployeeById);
 employeeRouter.get('/employee/dailyRecord/:employeeId', employeeServices.getTasksById);
 employeeRouter.put('/checkin/:dailyRecordId', uploadRecord.single('photo'), employeeServices.updateCheckin);
 employeeRouter.put('/checkout/:dailyRecordId', employeeServices.updateCheckout);
 employeeRouter.put('/employee/remark/:dailyRecordId', employeeServices.updateEmployeeRemark);
+employeeRouter.get('//dailyrecord/employee/all/:employeeId', employeeServices.getAllDailyRecordsByEmployeeId);
+employeeRouter.get('//dailyrecord/employee/all/:employeeId', employeeServices.getTodayDailyRecordsByEmployeeId);
 
 module.exports = employeeRouter;
 
-//get('/dailyrecord/employee/now/:employeeId')
+//delete('/employee/profile/:employeeId');
 
 //Common for all users
 //

@@ -15,7 +15,6 @@ router.post('/site', superAdminServices.addSite);
 router.get('/site', superAdminServices.getSites);
 router.get('/site/id/:siteId', adminServices.getSiteBySiteId);
 router.get('/site/location/:location', superAdminServices.getSiteByLocation);
-//router.put('/site/:siteId', superAdminServices.updateSite);
 router.delete('/site/:siteId', superAdminServices.removeSite);
 router.post('/dailyrecord', adminServices.addDailyRecord);
 router.get('/dailyrecord/all', superAdminServices.getAllDailyRecords);
@@ -29,20 +28,13 @@ router.put('/siteadmin/add/:siteId', adminServices.addSiteAdminsIntoSite);
 router.put('/siteadmin/delete/:siteId', adminServices.deleteSiteAdminsIntoSite);
 module.exports = router;
 
-//put('/siteadmin/add/:siteId')
-//put('/siteadmin/delete/:siteId')
-//put('/site/:siteId')
-
 
 //This are common for super admin and site admin
 //
-//get('/dailyrecord/lastassigned/:employeeId')
 //put('/dailyrecord/:dailyRecordId')
 //put('/siteadmin/remark/:dailyRecordId')
 //delete('/progressimage/:progressId')
 //get('/sites/admin/:employeeId')
-//get('/dailyrecord/now/')
-//get('/dailyrecord/all/')
 
 //Common for all users
 //
