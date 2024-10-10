@@ -26,6 +26,7 @@ siteAdminRouter.get('/dailyrecord/site/now/:siteId', siteAdminServices.getTodayD
 siteAdminRouter.get('/log', adminServices.getLogs);
 siteAdminRouter.get('/log/operation/:operation', adminServices.getLogsByOperation);
 siteAdminRouter.get('/log/modifier/:modifierId', adminServices.getLogsByModifierId);
+siteAdminRouter.get('/log/date/:date', adminServices.getLogsByDate);
 
 
 module.exports = siteAdminRouter;

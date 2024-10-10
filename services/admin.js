@@ -385,7 +385,7 @@ const getLogsByCondition = async (res, condition) => {
     return res.status(200).json({ logs });
 }
 
-exports.getLogs = async (req, res) => {
+exports.getLogs = (req, res) => {
     try {
         getLogsByCondition(res, {});
     } catch (error) {
@@ -393,7 +393,7 @@ exports.getLogs = async (req, res) => {
     }
 };
 
-exports.getLogsByOperation = async (req, res) => {
+exports.getLogsByOperation = (req, res) => {
     try {
         const { operation } = req.params;
         getLogsByCondition(res, { operation });
@@ -402,13 +402,35 @@ exports.getLogsByOperation = async (req, res) => {
     }
 };
 
-exports.getLogsByModifierId = async (req, res) => {
+exports.getLogsByModifierId = (req, res) => {
     try {
         const { modifierId } = req.params;
         if (!mongoose.Types.ObjectId.isValid(modifierId)) {
             return res.status(400).json({ message: 'Invalid ID format' });
         }
         getLogsByCondition(res, { modifierId });
+    } catch (error) {
+        return res.status(500).json({ message: "Server side error" });
+    }
+};
+
+exports.getLogsByDate = (req, res) => {
+    try {
+        const { date } = req.params;
+        const formatedDate = new Date(date);
+        if(formatedDate === "Invalid Date") {
+            return res.status(400).json({message: "Invalid date format"});
+        }
+        const nextFormattedDate = new Date(formatedDate);
+        nextFormattedDate.setDate(nextFormattedDate.getDate() + 1);
+        const timeStamps = { 
+            timeStamps : {
+                "$gte": formatedDate,
+                "$lt": nextFormattedDate
+            }
+         }
+         console.log(timeStamps);
+        getLogsByCondition(res, timeStamps);
     } catch (error) {
         return res.status(500).json({ message: "Server side error" });
     }
