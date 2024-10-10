@@ -4,6 +4,7 @@ const adminServices = require('../services/admin');
 const progressUpload = require('../middlewares/progress-uploads');
 const router = Router({ strict: true });
 const isAuth = require('../middlewares/isAuth');
+const dailyRecordService = require('../services/update-daily-record');
 
 
 router.post('/register', superAdminServices.register);
@@ -19,6 +20,7 @@ router.delete('/site/:siteId', superAdminServices.removeSite);
 router.post('/dailyrecord', adminServices.addDailyRecord);
 router.get('/dailyrecord/all', superAdminServices.getAllDailyRecords);
 router.get('/dailyrecord/now', superAdminServices.getTodayDailyRecords);
+router.put('/dailyrecord/:dailyrecordId', dailyRecordService.updateDailyRecord);
 router.delete('/dailyrecord/:dailyRecordId', superAdminServices.removeDailyRecord);
 router.post('/progressimage', progressUpload.array('photo', 12), adminServices.addProgressImage);
 router.get('/progressimage/:siteId', adminServices.getProgressBySite);

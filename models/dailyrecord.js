@@ -36,7 +36,7 @@ const dailyRecordSchema = mongoose.Schema(
             type: String,
             required: true
         },
-        worksStatus: {
+        workStatus: {
             type: String,
             enum: ['Completed','Incomplete','Pending','On hold']
         },

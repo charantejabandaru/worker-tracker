@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const employeeModel = require('../models/employee');
 const dailyRecordModel = require('../models/dailyrecord');
-const updateDailyRecord = require('./update-daily-record');
+const dailyRecordService = require('../services/update-daily-record');
 
 module.exports.checkLogin = async (req, res) => {
     try {
@@ -127,25 +127,40 @@ exports.updateProfileImage = async (req, res) => {
     }
 }
 
-module.exports.getTasksById = async (req, res) => {
-    const { employeeId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(employeeId)) {
-        return res.status(400).json({ message: 'Invalid ID format' });
-    }
+exports.deleteProfileImage = async (req, res) => {
     try {
-        const { employeeId } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(employeeId)) {
-            return res.status(400).json({ message: 'Invalid ID format' });
+        await removeDirectory(path.join(__dirname, `../uploads/employees/${req.params.employeeId}`));
+        const result = await employeeModel.findByIdAndUpdate(req.params.employeeId, {profilePhoto : undefined} , { new: true, runValidators: true });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ message: 'Employee not found' });
         }
-        const tasks = await dailyRecordModel.find({
-            employeeId: employeeId
-        }).populate('siteId');
-        return res.status(200).json({ tasks: tasks });
-    } catch (error) {
-        return res.status(500).json({ message: "Server side error" });
+        res.status(200).json({ message: 'Profile image deleted successfully'});
     }
-};
+    catch(error) {
+        if (error.kind === 'ObjectId') {
+            res.status(400).json({ message: 'Bad Request: Invalid employee ID' });
+        }
+        else {
+            res.status(500).json({ message: 'Internal Server Error', details: error.message });
+        }
+    }
+}
 
+exports.updateWorkStatus = async (req , res) => {
+    const {workStatus} = req.body;
+    if(!workStatus){
+        return res.status(400).json({ message: 'Required field missing' });
+    }
+    await dailyRecordService.updateDailyRecord(req, res);
+}
+
+exports.updateEmployeeRemark = async (req , res) => {
+    const {technicianRemark} = req.body;
+    if(!technicianRemark){
+        return res.status(400).json({ message: 'Required field missing' });
+    }
+    await dailyRecordService.updateDailyRecord(req, res);
+}
 
 module.exports.updateCheckin = async (req, res) => {
     try {
@@ -237,15 +252,6 @@ const moveFiles = async (filepath, req) => {
     }
 }
 
-module.exports.updateEmployeeRemark = (req, res) => {
-    const { dailyRecordId } = req.params;
-    const { technicianRemark } = req.body;
-    if (!mongoose.Types.ObjectId.isValid(dailyRecordId)) {
-        return res.status(400).json({ message: 'Invalid ID format' });
-    }
-    updateDailyRecord("technicianRemark", technicianRemark, dailyRecordId, res);
-}
-
 exports.getAllDailyRecordsByEmployeeId = async (req, res) => {
     try {
         const results = await dailyRecordModel.find({employeeId: req.params.employeeId});
@@ -303,16 +309,10 @@ const setCheckinImagesIfExist = async (results) => {
     return dailyRecords;
 }
 
-function getMimeType(ext) {
-    switch (ext) {
-        case '.png':
-            return 'image/png';
-        case '.jpg':
-        case '.jpeg':
-            return 'image/jpeg';
-        case '.svg':
-            return 'image/svg+xml';
-        default:
-            return 'application/octet-stream';
+async function removeDirectory(directoryPath) {
+    try {
+        await fs.rm(directoryPath, { recursive: true, force: true });
+    } catch (err) {
+        console.error(`Error removing directory: ${err}`);
     }
 }
