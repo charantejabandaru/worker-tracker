@@ -90,138 +90,6 @@ exports.getSiteBySiteId = async (req, res) => {
     }
 };
 
-exports.updateSiteBasicInfo = async (req, res) => {
-    try {
-        const { siteId } = req.params;
-        const newSiteDetails = req.body;
-        if (!mongoose.Types.ObjectId.isValid(siteId)) {
-            return res.status(400).json({ message: 'Invalid ID format' });
-        }
-        if (!newSiteDetails) {
-            return res.status(400).json({ message: "No data in request body" });
-        }
-        delete newSiteDetails.siteAdmins;
-        const result = await siteModel.findByIdAndUpdate(siteId, newSiteDetails, { new: true, runValidators: true });
-        if (!result) {
-            return res.status(404).json({ messsage: "Site Id not found" });
-        }
-        await logService({
-            modifierId: req.cookies.employee_details.id,
-            siteId: result._id,
-            operation: "updatedSite",
-            message: "Updated site details"
-        });
-        return res.status(200).json({ message: "Successfully updated site details" });
-    } catch (error) {
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
-        }
-        else if (error.code === 11000) {
-            return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
-        }
-        else {
-            res.status(500).json({ message: "Error occured while uploading image", details: error.message });
-        }
-    }
-};
-
-exports.addSiteAdminsIntoSite = async (req, res) => {
-    try {
-        const { siteId } = req.params;
-        const { siteAdmins } = req.body;
-        if (!mongoose.Types.ObjectId.isValid(siteId)) {
-            return res.status(400).json({ message: 'Invalid ID format' });
-        }
-        if (!siteAdmins) {
-            return res.status(400).json({ message: "No siteadmins data in the request body" });
-        }
-        const result = await siteModel.findByIdAndUpdate(
-            siteId,
-            {
-                "$push": {
-                    siteAdmins: {
-                        "$each": siteAdmins
-                    }
-                }
-            },
-            { new: true, runValidators: true }
-        );
-        if (!result) {
-            return res.status(404).json({ message: "Site Id not found" });
-        }
-        await logService({
-            modifierId: req.cookies.employee_details.id,
-            siteId: result._id,
-            operation: "addedAdmin",
-            message: "Added site admins"
-        });
-        return res.status(200).json({ message: "Site admins added successfully into site" });
-    } catch (error) {
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
-        }
-        else if (error.code === 11000) {
-            return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
-        }
-        else {
-            res.status(500).json({ message: "Error occured while uploading image", details: error.message });
-        }
-    }
-};
-
-exports.deleteSiteAdminsIntoSite = async (req, res) => {
-    try {
-        const { siteId } = req.params;
-        const { siteAdmins } = req.body;
-        if (!mongoose.Types.ObjectId.isValid(siteId)) {
-            return res.status(400).json({ message: 'Invalid ID format' });
-        }
-        if (!siteAdmins) {
-            return res.status(400).json({ message: "No siteadmins data in the request body" });
-        }
-        const result = await siteModel.findByIdAndUpdate(
-            siteId,
-            {
-                "$pull": {
-                    siteAdmins: {
-                        "$in": siteAdmins
-                    }
-                }
-            },
-            { new: true, runValidators: true }
-        );
-        if (!result) {
-            return res.status(404).json({ message: "Site Id not found" });
-        }
-        await logService({
-            modifierId: req.cookies.employee_details.id,
-            siteId: result._id,
-            operation: "deletedAdmin",
-            message: "Deleted site admins"
-        });
-        return res.status(200).json({ message: "Site admins deleted successfully from site" });
-    } catch (error) {
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
-        }
-        else if (error.code === 11000) {
-            return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
-        }
-        else {
-            res.status(500).json({ message: "Error occured while uploading image", details: error.message });
-        }
-    }
-};
-
-exports.updateRemark = (req, res) => {
-    const { dailyRecordId } = req.params;
-    const { adminRemark } = req.body;
-    if (!mongoose.Types.ObjectId.isValid(dailyRecordId)) {
-        return res.status(400).json({ message: 'Invalid ID format' });
-    }
-    updateDailyRecord("adminRemark", adminRemark, dailyRecordId, res);
-};
-
 exports.addDailyRecord = async (req, res) => {
     try {
         const dailyRecord = req.body;
@@ -259,15 +127,6 @@ exports.getSitesBySiteAdminId = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ message: "Server side error" });
     }
-};
-
-exports.updateWorkStatus = (req, res) => {
-    const { dailyRecordId } = req.params;
-    const { worksStatus } = req.body;
-    if (!mongoose.Types.ObjectId.isValid(dailyRecordId)) {
-        return res.status(400).json({ message: 'Invalid ID format' });
-    }
-    updateDailyRecord("worksStatus", worksStatus, dailyRecordId, res);
 };
 
 exports.addProgressImage = async (req, res) => {
@@ -435,3 +294,26 @@ exports.getLogsByDate = (req, res) => {
         return res.status(500).json({ message: "Server side error" });
     }
 };
+
+exports.deleteProgressImage = async (req, res) => {
+    try {
+        const progress = await progressModel.find({ _id: req.params.progressId});
+        if(!progress){
+            return res.status(404).json({ message: "Progress Id not found" });
+        }
+        await fs.unlink(progress.imageUrl);
+        const result = await progressModel.deleteOne({ _id : req.params.progressId});
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ message: 'Record not found' });
+        }
+        res.status(200).json({ message: 'Progress image deleted successfully' });
+    }
+    catch(error) {
+        if (error.kind === 'ObjectId') {
+            res.status(400).json({ message: 'Bad Request: Invalid ID' });
+        }
+        else {
+            res.status(500).json({ message: 'Internal Server Error', details: error.message });
+        }
+    }
+}

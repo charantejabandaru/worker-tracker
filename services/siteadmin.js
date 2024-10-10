@@ -104,7 +104,7 @@ exports.getAllDailyRecordsBySite = async (req, res) => {
         await setCheckinImagesIfExist(results);
         res.status(200).json(results);
     }
-    catch(errro) {
+    catch(error) {
         res.status(500).json({ message: "Server error. Could not fetch resources." });
     }
 }
@@ -123,7 +123,7 @@ exports.getTodayDailyRecordsBySite = async (req, res) => {
         await setCheckinImagesIfExist(results);
         res.status(200).json(results);
     }
-    catch(errro) {
+    catch(error) {
         res.status(500).json({ message: "Server error. Could not fetch resources." });
     }
 }

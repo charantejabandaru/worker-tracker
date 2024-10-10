@@ -4,7 +4,6 @@ const bcrypt = require('bcrypt');
 const employeeModel = require('../models/employee');
 const siteModel = require('../models/site');
 const dailyRecordModel = require('../models/dailyrecord');
-const siteAdminServices = require('./siteadmin');
 const logService = require('./log');
 
 exports.register = async (req, res) => {
@@ -100,6 +99,128 @@ exports.getSiteByLocation = async (req, res) => {
     }
 }
 
+exports.updateSiteBasicInfo = async (req, res) => {
+    try {
+        const { siteId } = req.params;
+        const newSiteDetails = req.body;
+        if (!mongoose.Types.ObjectId.isValid(siteId)) {
+            return res.status(400).json({ message: 'Invalid ID format' });
+        }
+        if (!newSiteDetails) {
+            return res.status(400).json({ message: "No data in request body" });
+        }
+        delete newSiteDetails.siteAdmins;
+        const result = await siteModel.findByIdAndUpdate(siteId, newSiteDetails, { new: true, runValidators: true });
+        if (!result) {
+            return res.status(404).json({ messsage: "Site Id not found" });
+        }
+        await logService({
+            modifierId: req.cookies.employee_details.id,
+            siteId: result._id,
+            operation: "updatedSite",
+            message: "Updated site details"
+        });
+        return res.status(200).json({ message: "Successfully updated site details" });
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
+        }
+        else if (error.code === 11000) {
+            return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
+        }
+        else {
+            res.status(500).json({ message: "Error occured while uploading image", details: error.message });
+        }
+    }
+};
+
+exports.addSiteAdminsIntoSite = async (req, res) => {
+    try {
+        const { siteId } = req.params;
+        const { siteAdmins } = req.body;
+        if (!mongoose.Types.ObjectId.isValid(siteId)) {
+            return res.status(400).json({ message: 'Invalid ID format' });
+        }
+        if (!siteAdmins) {
+            return res.status(400).json({ message: "No siteadmins data in the request body" });
+        }
+        const result = await siteModel.findByIdAndUpdate(
+            siteId,
+            {
+                "$push": {
+                    siteAdmins: {
+                        "$each": siteAdmins
+                    }
+                }
+            },
+            { new: true, runValidators: true }
+        );
+        if (!result) {
+            return res.status(404).json({ message: "Site Id not found" });
+        }
+        await logService({
+            modifierId: req.cookies.employee_details.id,
+            siteId: result._id,
+            operation: "addedAdmin",
+            message: "Added site admins"
+        });
+        return res.status(200).json({ message: "Site admins added successfully into site" });
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
+        }
+        else if (error.code === 11000) {
+            return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
+        }
+        else {
+            res.status(500).json({ message: "Error occured while uploading image", details: error.message });
+        }
+    }
+};
+
+exports.deleteSiteAdminsIntoSite = async (req, res) => {
+    try {
+        const { siteId } = req.params;
+        const { siteAdmins } = req.body;
+        if (!mongoose.Types.ObjectId.isValid(siteId)) {
+            return res.status(400).json({ message: 'Invalid ID format' });
+        }
+        if (!siteAdmins) {
+            return res.status(400).json({ message: "No siteadmins data in the request body" });
+        }
+        const result = await siteModel.findByIdAndUpdate(
+            siteId,
+            {
+                "$pull": {
+                    siteAdmins: {
+                        "$in": siteAdmins
+                    }
+                }
+            },
+            { new: true, runValidators: true }
+        );
+        if (!result) {
+            return res.status(404).json({ message: "Site Id not found" });
+        }
+        await logService({
+            modifierId: req.cookies.employee_details.id,
+            siteId: result._id,
+            operation: "deletedAdmin",
+            message: "Deleted site admins"
+        });
+        return res.status(200).json({ message: "Site admins deleted successfully from site" });
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
+        }
+        else if (error.code === 11000) {
+            return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
+        }
+        else {
+            res.status(500).json({ message: "Error occured while uploading image", details: error.message });
+        }
+    }
+};
 
 exports.removeSite = async (req, res) => {
     try {
@@ -125,7 +246,7 @@ exports.getAllDailyRecords = async (req, res) => {
         await setCheckinImagesIfExist(results);
         res.status(200).json(results);
     }
-    catch(errro) {
+    catch(error) {
         res.status(500).json({ message: "Server error. Could not fetch resources." });
     }
 }
@@ -140,7 +261,7 @@ exports.getTodayDailyRecords = async (req, res) => {
         await setCheckinImagesIfExist(results);
         res.status(200).json(results);
     }
-    catch(errro) {
+    catch(error) {
         res.status(500).json({ message: "Server error. Could not fetch resources." });
     }
 }
