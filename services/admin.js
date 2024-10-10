@@ -6,6 +6,7 @@ const dailyRecordModel = require('../models/dailyrecord');
 const employeeModel = require('../models/employee');
 const siteModel = require('../models/site');
 const logService = require('./log');
+const logModel = require('../models/log');
 
 exports.getEmployees = async (req, res) => {
     try {
@@ -107,7 +108,8 @@ exports.updateSiteBasicInfo = async (req, res) => {
         await logService({
             modifierId: req.cookies.employee_details.id,
             siteId: result._id,
-            message: "Updated site details" 
+            operation: "updatedSite",
+            message: "Updated site details"
         });
         return res.status(200).json({ message: "Successfully updated site details" });
     } catch (error) {
@@ -150,7 +152,8 @@ exports.addSiteAdminsIntoSite = async (req, res) => {
         await logService({
             modifierId: req.cookies.employee_details.id,
             siteId: result._id,
-            message: "Added site admins" 
+            operation: "addedAdmin",
+            message: "Added site admins"
         });
         return res.status(200).json({ message: "Site admins added successfully into site" });
     } catch (error) {
@@ -193,7 +196,8 @@ exports.deleteSiteAdminsIntoSite = async (req, res) => {
         await logService({
             modifierId: req.cookies.employee_details.id,
             siteId: result._id,
-            message: "Deleted site admins" 
+            operation: "deletedAdmin",
+            message: "Deleted site admins"
         });
         return res.status(200).json({ message: "Site admins deleted successfully from site" });
     } catch (error) {
@@ -226,7 +230,8 @@ exports.addDailyRecord = async (req, res) => {
         await logService({
             modifierId: req.cookies.employee_details.id,
             employeeId: dailyRecord.employeeId,
-            message: "Assigned work to" 
+            operation: "assignedWork",
+            message: "Assigned work to"
         });
         res.status(201).json({ message: 'Record added successfully' });
     }
@@ -348,12 +353,12 @@ exports.getProgressBySite = async (req, res) => {
                 const mimeType = getMimeType(ext);
                 const base64Image = Buffer.from(imageData).toString('base64');
                 const progressImage = `data:${mimeType};base64,${base64Image}`;
-                
+
                 const { siteId, name, comments, date } = result;
                 return { siteId, name, comments, date, progressImage };
             })
         );
-        
+
         res.status(200).json(progressImages);
     }
     catch (error) {
@@ -375,3 +380,36 @@ function getMimeType(ext) {
     }
 }
 
+const getLogsByCondition = async (res, condition) => {
+    const logs = await logModel.find(condition).populate('modifierId').populate('employeeId').populate('siteId');
+    return res.status(200).json({ logs });
+}
+
+exports.getLogs = async (req, res) => {
+    try {
+        getLogsByCondition(res, {});
+    } catch (error) {
+        return res.status(500).json({ message: "Server side error" });
+    }
+};
+
+exports.getLogsByOperation = async (req, res) => {
+    try {
+        const { operation } = req.params;
+        getLogsByCondition(res, { operation });
+    } catch (error) {
+        return res.status(500).json({ message: "Server side error" });
+    }
+};
+
+exports.getLogsByModifierId = async (req, res) => {
+    try {
+        const { modifierId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(modifierId)) {
+            return res.status(400).json({ message: 'Invalid ID format' });
+        }
+        getLogsByCondition(res, { modifierId });
+    } catch (error) {
+        return res.status(500).json({ message: "Server side error" });
+    }
+};

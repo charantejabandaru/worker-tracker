@@ -19,6 +19,7 @@ exports.register = async (req, res) => {
         await logService({
             modifierId: req.cookies.employee_details.id,
             employeeId: newEmployee._id,
+            operation: "createdEmployee",
             message: "Created new employee" 
         });
         res.status(201).json({ message: 'Employee registered successfully' });
@@ -57,11 +58,11 @@ exports.removeEmployee = async (req, res) => {
 exports.addSite = async (req, res) => {
     try {
         const site = req.body;
-        console.log(site);
         const newSite = await siteModel.create(site);
         await logService({
             modifierId: req.cookies.employee_details.id,
             siteId: newSite._id,
+            operation: "createdSite",
             message: "Created new site" 
         });
         res.status(201).json({ message: 'Site added successfully' });

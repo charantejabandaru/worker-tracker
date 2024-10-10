@@ -13,8 +13,7 @@ exports.getDailyRecordsBySiteId = async (req, res) => {
             return res.status(400).json({ message: 'Invalid ID format' });
         }
         const dailyRecords = await dailyRecordModel.find({
-            siteId: siteId,
-            
+            siteId: siteId
         }).populate('employeeId');
         return res.status(200).json({ dailyRecords: dailyRecords });
     } catch (error) {
