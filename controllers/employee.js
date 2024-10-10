@@ -17,5 +17,6 @@ employeeRouter.put('/employee/remark/:dailyRecordId', isAuth(allowRoles), employ
 employeeRouter.put('/employee/workstatus/:dailyRecordId', isAuth(allowRoles), employeeServices.updateWorkStatus);
 employeeRouter.get('/dailyrecord/employee/all/:employeeId', isAuth(allowRoles), employeeServices.getAllDailyRecordsByEmployeeId);
 employeeRouter.get('/dailyrecord/employee/now/:employeeId', isAuth(allowRoles), employeeServices.getTodayDailyRecordsByEmployeeId);
+employeeRouter.put('/status/:employeeId', isAuth(allowRoles), employeeServices.updateStatus);
 
 module.exports = employeeRouter;

@@ -71,6 +71,27 @@ function getMimeType(ext) {
     }
 }
 
+exports.updateStatus = async (req, res) => {
+    try {
+        const employee = await employeeModel.findByIdAndUpdate(req.params.employeeId, {status: req.body.status}, { new: true, runValidators: true });
+        if (!employee) {
+            return res.status(404).json({ message: "Employee Id not found" });
+        }
+        return res.status(200).json({ message: "Employee status updated successfully" });
+    }
+    catch(error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
+        }
+        else if (error.code === 11000) {
+            return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
+        } 
+        else {
+            return res.status(500).json({ message: "Server side error" });
+        }
+    }
+}
+
 exports.updateEmployeeById = async (req, res) => {
     try {
         const { employeeId } = req.params;
@@ -95,7 +116,8 @@ exports.updateEmployeeById = async (req, res) => {
         }
         else if (error.code === 11000) {
             return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
-        } else {
+        } 
+        else {
             return res.status(500).json({ message: "Server side error" });
         }
     }
@@ -168,6 +190,10 @@ module.exports.updateCheckin = async (req, res) => {
         const filepath = path.join(__dirname, `../uploads/dailyrecords`);
         await createDirIfNotExists(filepath, req);
         await moveFiles(filepath, req);
+        const employee = await employeeModel.findByIdAndUpdate(req.body.employeeId, {status: 'assigned'}, { new: true, runValidators: true });
+        if (!employee) {
+            return res.status(404).json({ message: "Employee Id not found" });
+        }
         res.status(200).json({ message: 'image upload successful' });
     }
     catch (error) {
@@ -189,13 +215,20 @@ module.exports.updateCheckout = async (req, res) => {
             location: req.body.location,
             timestamp: new Date()
         }
-        await dailyRecordModel.findByIdAndUpdate(
+        const dailyRecord = await dailyRecordModel.findByIdAndUpdate(
             req.params.dailyRecordId,
             {
                 "$push": { checkout: checkout }
             },
             { new: true, runValidators: true }
         );
+        if (!dailyRecord) {
+            return res.status(404).json({ message: "Record Id not found" });
+        }
+        const employee = await employeeModel.findByIdAndUpdate(req.body.employeeId, {status: 'available'}, { new: true, runValidators: true });
+        if (!employee) {
+            return res.status(404).json({ message: "Employee Id not found" });
+        }
         res.status(200).json({ message: 'Updated successfully' });
     }
     catch (error) {
@@ -240,14 +273,16 @@ const moveFiles = async (filepath, req) => {
             location: req.body.data.location,
             timestamp: new Date()
         }
-        await dailyRecordModel.findByIdAndUpdate(
+        const dailyRecord = await dailyRecordModel.findByIdAndUpdate(
             req.params.dailyRecordId,
             {
                 "$push": { checkin: checkin }
             },
             { new: true, runValidators: true }
         );
-
+        if (!dailyRecord) {
+            return res.status(404).json({ message: "Record Id not found" });
+        }
         await fs.rename(oldPath, newPath);
     }
 }

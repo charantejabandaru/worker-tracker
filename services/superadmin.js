@@ -38,8 +38,8 @@ exports.register = async (req, res) => {
 
 exports.removeEmployee = async (req, res) => {
     try {
-        const result = await employeeModel.deleteOne({ _id: req.params.employeeId });
-        if (result.deletedCount === 0) {
+        const result = await employeeModel.findByIdAndUpdate(req.params.employeeId,{ activeStatus: 0 },{ new: true, runValidators: true });
+        if (!result) {
             return res.status(404).json({ message: 'Employee not found' });
         }
         res.status(200).json({ message: 'Employee removed successfully' });
@@ -83,19 +83,6 @@ exports.getSites = async (req, res) => {
     }
     catch (error) {
         res.status(500).json({ message: "Server error. Could not fetch resources." });
-    }
-}
-
-exports.getSiteByLocation = async (req, res) => {
-    try {
-        const result = await siteModel.findOne({ location: req.params.location });
-        if (!result) {
-            return res.status(404).json({ message: "No sites in " + req.params.location });
-        }
-        res.status(200).json(result);
-    }
-    catch (error) {
-        res.status(500).json({ message: "Server error occurred. Please try again later." });
     }
 }
 

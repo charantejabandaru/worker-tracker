@@ -10,7 +10,7 @@ const logModel = require('../models/log');
 
 exports.getEmployees = async (req, res) => {
     try {
-        const results = await employeeModel.find({});
+        const results = await employeeModel.find({ activeStatus: 1 });
         const employees = results.map((result) => {
             const { _id, name, email, mobile, role, skill, status } = result;
             return { _id, name, email, mobile, role, skill, status };
@@ -24,7 +24,7 @@ exports.getEmployees = async (req, res) => {
 
 exports.getEmployeeByRole = async (req, res) => {
     try {
-        const results = await employeeModel.find({ role: req.params.role });
+        const results = await employeeModel.find({ role: req.params.role }, { activeStatus: 1 });
         if (results.length === 0) {
             return res.status(404).json({ message: `Employee with role ${req.params.role} not found` });
         }
@@ -41,7 +41,7 @@ exports.getEmployeeByRole = async (req, res) => {
 
 exports.getEmployeeStatus = async (req, res) => {
     try {
-        const results = await employeeModel.find({ status: req.params.status });
+        const results = await employeeModel.find({ status: req.params.status }, { activeStatus: 1 });
         if (results.length === 0) {
             return res.status(404).json({ message: `No one with status ${req.params.status}` });
         }
@@ -91,10 +91,15 @@ exports.getSiteBySiteId = async (req, res) => {
 };
 
 exports.addDailyRecord = async (req, res) => {
+    const session = await mongoose.startSession();
     try {
+        session.startTransaction();
         const dailyRecord = req.body;
         dailyRecord.date = new Date();
         await dailyRecordModel.create(dailyRecord);
+        await employeeModel.findByIdAndUpdate(dailyRecord.employeeId, { status: 'assigned' }, { new: true, runValidators: true });
+        await session.commitTransaction();
+        session.endSession();
         await logService({
             modifierId: req.cookies.employee_details.id,
             employeeId: dailyRecord.employeeId,
@@ -104,11 +109,15 @@ exports.addDailyRecord = async (req, res) => {
         res.status(201).json({ message: 'Record added successfully' });
     }
     catch (error) {
+        await session.abortTransaction();
+        session.endSession();
         if (error.name === 'ValidationError') {
             res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
-        } else if (error.code === 11000) {
+        }
+        else if (error.code === 11000) {
             return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
-        } else {
+        }
+        else {
             res.status(500).json({ message: 'Internal Server Error', details: error.message });
         }
     }
@@ -277,18 +286,18 @@ exports.getLogsByDate = (req, res) => {
     try {
         const { date } = req.params;
         const formatedDate = new Date(date);
-        if(formatedDate === "Invalid Date") {
-            return res.status(400).json({message: "Invalid date format"});
+        if (formatedDate === "Invalid Date") {
+            return res.status(400).json({ message: "Invalid date format" });
         }
         const nextFormattedDate = new Date(formatedDate);
         nextFormattedDate.setDate(nextFormattedDate.getDate() + 1);
-        const timeStamps = { 
-            timeStamps : {
+        const timeStamps = {
+            timeStamps: {
                 "$gte": formatedDate,
                 "$lt": nextFormattedDate
             }
-         }
-         console.log(timeStamps);
+        }
+        console.log(timeStamps);
         getLogsByCondition(res, timeStamps);
     } catch (error) {
         return res.status(500).json({ message: "Server side error" });
@@ -297,18 +306,18 @@ exports.getLogsByDate = (req, res) => {
 
 exports.deleteProgressImage = async (req, res) => {
     try {
-        const progress = await progressModel.find({ _id: req.params.progressId});
-        if(!progress){
+        const progress = await progressModel.find({ _id: req.params.progressId });
+        if (!progress) {
             return res.status(404).json({ message: "Progress Id not found" });
         }
         await fs.unlink(progress.imageUrl);
-        const result = await progressModel.deleteOne({ _id : req.params.progressId});
+        const result = await progressModel.deleteOne({ _id: req.params.progressId });
         if (result.deletedCount === 0) {
             return res.status(404).json({ message: 'Record not found' });
         }
         res.status(200).json({ message: 'Progress image deleted successfully' });
     }
-    catch(error) {
+    catch (error) {
         if (error.kind === 'ObjectId') {
             res.status(400).json({ message: 'Bad Request: Invalid ID' });
         }

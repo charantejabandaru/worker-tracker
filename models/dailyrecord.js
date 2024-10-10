@@ -18,7 +18,7 @@ const dailyRecordSchema = mongoose.Schema(
                 unique: true
             },
             location: {
-                type: String
+                type: [Number]
             },
             timestamp: {
                 type: Date
@@ -26,7 +26,7 @@ const dailyRecordSchema = mongoose.Schema(
         }],
         checkout: [{
             location: {
-                type: String
+                type: [Number]
             },
             timestamp: {
                 type: Date

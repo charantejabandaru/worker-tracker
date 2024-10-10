@@ -40,6 +40,10 @@ const employeeSchema = mongoose.Schema(
                 type: String,
                 unique: true
             }
+        },
+        activeStatus: {
+            type: Number,
+            default: 1
         }
     }
 );
