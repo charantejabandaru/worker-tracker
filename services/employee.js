@@ -21,7 +21,7 @@ module.exports.checkLogin = async (req, res) => {
         if (result) {
             const payload = { role: employee.role };
             const token = jwt.sign(payload, process.env.SECRETKEY);
-            res.status(200).cookie('employee_details', { id: employee._id, auth_token: token }, { maxAge: 900000, httpOnly: true });
+            res.status(200).cookie('employee_details', { id: employee._id, auth_token: `bearer ${token}` }, { maxAge: 9000000, httpOnly: true });
             return res.status(200).json({ message: "LoggedIn successfully" });
         } else {
             return res.status(401).json({ message: "Invalid password" });

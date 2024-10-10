@@ -3,7 +3,11 @@ const jwt = require('jsonwebtoken');
 module.exports = (roles = []) => {
     return (req, res, next) => {
         try {
-            const { authorization } = req.headers;
+            const { employee_details } = req.cookies;
+            if (!employee_details) {
+                return res.status(401).json({ message: "No authorization header" });
+            }
+            const authorization = employee_details.auth_token;
             if (!authorization) {
                 return res.status(401).json({ message: "No authorization header" });
             }

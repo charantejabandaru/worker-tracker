@@ -1,7 +1,8 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
-var bodyparser = require("body-parser");
+const bodyparser = require("body-parser");
+const cookieParser = require('cookie-parser');
 const configdb = require("./config/database");
 const app = express();
 
@@ -10,6 +11,7 @@ app.use(cors({
 }));
 app.use(bodyparser.urlencoded({extended : true}));
 app.use(express.json());
+app.use(cookieParser());
 
 dotenv.config({path : './config/.env'})
 configdb();

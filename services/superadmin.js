@@ -5,6 +5,7 @@ const employeeModel = require('../models/employee');
 const siteModel = require('../models/site');
 const dailyRecordModel = require('../models/dailyrecord');
 const siteAdminServices = require('./siteadmin');
+const logService = require('./log');
 
 exports.register = async (req, res) => {
     const employee = req.body;
@@ -14,7 +15,12 @@ exports.register = async (req, res) => {
     }
     employee.password = bcrypt.hashSync(password, 10);
     try {
-        await employeeModel.create(employee);
+        const newEmployee = await employeeModel.create(employee);
+        await logService({
+            modifierId: req.cookies.employee_details.id,
+            employeeId: newEmployee._id,
+            message: "Created new employee" 
+        });
         res.status(201).json({ message: 'Employee registered successfully' });
     }
     catch (error) {
@@ -51,7 +57,13 @@ exports.removeEmployee = async (req, res) => {
 exports.addSite = async (req, res) => {
     try {
         const site = req.body;
-        await siteModel.create(site);
+        console.log(site);
+        const newSite = await siteModel.create(site);
+        await logService({
+            modifierId: req.cookies.employee_details.id,
+            siteId: newSite._id,
+            message: "Created new site" 
+        });
         res.status(201).json({ message: 'Site added successfully' });
     }
     catch (error) {
