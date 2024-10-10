@@ -16,8 +16,11 @@ const adminServices = require('../services/admin');
 
 siteAdminRouter.get('/sites/admin/:employeeId', adminServices.getSitesBySiteAdminId);
 siteAdminRouter.get('/site/id/:siteId', adminServices.getSiteBySiteId);
+<<<<<<< Updated upstream
 siteAdminRouter.get('/site/dailyRecord/:siteId', siteAdminService.getDailyRecordsBySiteId);
 // siteAdminRouter.post('/request', siteAdminService.createRequest);
+=======
+>>>>>>> Stashed changes
 siteAdminRouter.put('/siteadmin/remark/:dailyRecordId', adminServices.updateRemark);
 siteAdminRouter.put('/workstatus/:dailyRecordId', adminServices.updateWorkStatus);
 // siteAdminRouter.put('/assignwork/:dailyRecordId', siteAdminService.updateWorkAssigned);
@@ -43,8 +46,6 @@ module.exports = siteAdminRouter;
 //delete('/progressimage/:progressId')--
 //post('/progressimage')--
 //get('/sites/admin/:employeeId') 1
-//get('/dailyrecord/site/now/:siteId')
-//get('/dailyrecord/site/all/:siteId')
 
 //Common for all users
 //
