@@ -3,6 +3,7 @@ const siteAdminRouter = express.Router();
 const siteAdminServices = require('../services/siteadmin');
 const adminServices = require('../services/admin');
 const dailyRecordService = require('../services/update-daily-record');
+const progressUpload = require('../middlewares/progress-uploads');
 const isAuth = require('../middlewares/isAuth');
 const admins = ["siteAdmin", "superAdmin"];
 const siteAdmin = ["siteAdmin"];
