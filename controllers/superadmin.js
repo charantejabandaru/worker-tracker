@@ -3,6 +3,7 @@ const superAdminServices = require('../services/superadmin');
 const adminServices = require('../services/admin');
 const progressUpload = require('../middlewares/progress-uploads');
 const router = Router({ strict: true });
+const isAuth = require('../middlewares/isAuth');
 
 
 router.post('/register', superAdminServices.register);

@@ -16,7 +16,7 @@ const adminServices = require('../services/admin');
 
 siteAdminRouter.get('/sites/admin/:employeeId', adminServices.getSitesBySiteAdminId);
 siteAdminRouter.get('/site/id/:siteId', adminServices.getSiteBySiteId);
-// siteAdminRouter.get('/site/dailyRecord/:siteId', siteAdminService.getDailyRecordsBySiteId);
+siteAdminRouter.get('/site/dailyRecord/:siteId', siteAdminService.getDailyRecordsBySiteId);
 // siteAdminRouter.post('/request', siteAdminService.createRequest);
 siteAdminRouter.put('/siteadmin/remark/:dailyRecordId', adminServices.updateRemark);
 siteAdminRouter.put('/workstatus/:dailyRecordId', adminServices.updateWorkStatus);

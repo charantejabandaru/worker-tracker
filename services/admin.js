@@ -5,6 +5,7 @@ const progressModel = require('../models/progress');
 const dailyRecordModel = require('../models/dailyrecord');
 const employeeModel = require('../models/employee');
 const siteModel = require('../models/site');
+const logService = require('./log');
 
 exports.getEmployees = async (req, res) => {
     try {
@@ -103,6 +104,11 @@ exports.updateSiteBasicInfo = async (req, res) => {
         if (!result) {
             return res.status(404).json({ messsage: "Site Id not found" });
         }
+        await logService({
+            modifierId: req.cookies.employee_details.id,
+            siteId: result._id,
+            message: "Updated site details" 
+        });
         return res.status(200).json({ message: "Successfully updated site details" });
     } catch (error) {
         if (error.name === 'ValidationError') {
@@ -141,6 +147,11 @@ exports.addSiteAdminsIntoSite = async (req, res) => {
         if (!result) {
             return res.status(404).json({ message: "Site Id not found" });
         }
+        await logService({
+            modifierId: req.cookies.employee_details.id,
+            siteId: result._id,
+            message: "Added site admins" 
+        });
         return res.status(200).json({ message: "Site admins added successfully into site" });
     } catch (error) {
         if (error.name === 'ValidationError') {
@@ -179,6 +190,11 @@ exports.deleteSiteAdminsIntoSite = async (req, res) => {
         if (!result) {
             return res.status(404).json({ message: "Site Id not found" });
         }
+        await logService({
+            modifierId: req.cookies.employee_details.id,
+            siteId: result._id,
+            message: "Deleted site admins" 
+        });
         return res.status(200).json({ message: "Site admins deleted successfully from site" });
     } catch (error) {
         if (error.name === 'ValidationError') {
@@ -207,13 +223,19 @@ exports.addDailyRecord = async (req, res) => {
         const dailyRecord = req.body;
         dailyRecord.date = formatDate();
         await dailyRecordModel.create(dailyRecord);
+        await logService({
+            modifierId: req.cookies.employee_details.id,
+            employeeId: dailyRecord.employeeId,
+            message: "Assigned work to" 
+        });
         res.status(201).json({ message: 'Record added successfully' });
     }
     catch (error) {
         if (error.name === 'ValidationError') {
             res.status(400).json({ message: 'Bad Request: Validation failed', details: error.message });
-        }
-        else {
+        } else if (error.code === 11000) {
+            return res.status(409).json({ message: 'Conflict: Duplicate key error', details: error.message });
+        } else {
             res.status(500).json({ message: 'Internal Server Error', details: error.message });
         }
     }
