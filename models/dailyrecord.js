@@ -26,7 +26,7 @@ const dailyRecordSchema = mongoose.Schema(
         }],
         checkout: [{
             location: {
-                type: Date
+                type: String
             },
             timestamp: {
                 type: Date

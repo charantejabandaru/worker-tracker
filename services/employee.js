@@ -260,7 +260,7 @@ exports.getAllDailyRecordsByEmployeeId = async (req, res) => {
     }
 }
 
-exports.getTodayDailyRecordsBySite = async (req, res) => {
+exports.getTodayDailyRecordsByEmployeeId = async (req, res) => {
     try {
         const results = await dailyRecordModel.find({
             date: {

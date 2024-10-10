@@ -23,6 +23,10 @@ siteAdminRouter.put('/workstatus/:dailyRecordId', adminServices.updateWorkStatus
 siteAdminRouter.get('/dailyrecord/lastassigned/:employeeId', adminServices.getLastAssignedWoryByEmployeeId);
 siteAdminRouter.get('/dailyrecord/site/all/:siteId', siteAdminServices.getAllDailyRecordsBySite);
 siteAdminRouter.get('/dailyrecord/site/now/:siteId', siteAdminServices.getTodayDailyRecordsBySite);
+siteAdminRouter.get('/log', adminServices.getLogs);
+siteAdminRouter.get('/log/operation/:operation', adminServices.getLogsByOperation);
+siteAdminRouter.get('/log/modifier/:modifierId', adminServices.getLogsByModifierId);
+
 
 module.exports = siteAdminRouter;
 

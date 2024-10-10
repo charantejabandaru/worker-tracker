@@ -14,8 +14,8 @@ employeeRouter.get('/employee/dailyRecord/:employeeId', employeeServices.getTask
 employeeRouter.put('/checkin/:dailyRecordId', uploadRecord.single('photo'), employeeServices.updateCheckin);
 employeeRouter.put('/checkout/:dailyRecordId', employeeServices.updateCheckout);
 employeeRouter.put('/employee/remark/:dailyRecordId', employeeServices.updateEmployeeRemark);
-employeeRouter.get('//dailyrecord/employee/all/:employeeId', employeeServices.getAllDailyRecordsByEmployeeId);
-employeeRouter.get('//dailyrecord/employee/all/:employeeId', employeeServices.getTodayDailyRecordsByEmployeeId);
+employeeRouter.get('/dailyrecord/employee/all/:employeeId', employeeServices.getAllDailyRecordsByEmployeeId);
+employeeRouter.get('/dailyrecord/employee/all/:employeeId', employeeServices.getTodayDailyRecordsByEmployeeId);
 
 module.exports = employeeRouter;
 

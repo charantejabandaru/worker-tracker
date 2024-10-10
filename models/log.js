@@ -14,6 +14,11 @@ const logSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'sites'
     },
+    operation: {
+        type: String,
+        enum: ["createdEmployee", "createdSite", "assignedWork", "addedAdmin", "deletedAdmin", "updatedSite"],
+        requierd: true
+    },
     message: {
         type: String,
         required: true
